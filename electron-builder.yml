@@ -3,11 +3,14 @@ productName: CineFlow AI
 directories:
   output: release
   buildResources: build
+afterPack: scripts/afterPack.js
+afterAllArtifactBuild: scripts/afterAllArtifactBuild.js
 files:
   - dist/**/*
   - node_modules/**/*
   - package.json
 mac:
+  identity: null
   icon: build/icon.icns
   category: public.app-category.video
   target:
