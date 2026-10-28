@@ -7,9 +7,29 @@ export interface GenerateScriptOptions {
 }
 
 export class AgyClient {
+  private static getSpawnEnv() {
+    const home = process.env.HOME || '';
+    const extraPaths = [
+      `${home}/.local/bin`,
+      '/opt/homebrew/bin',
+      '/usr/local/bin',
+      '/usr/bin',
+      '/bin',
+      '/usr/sbin',
+      '/sbin',
+    ];
+    const currentPath = process.env.PATH || '';
+    const mergedPath = Array.from(new Set([...extraPaths, ...currentPath.split(':')])).filter(Boolean).join(':');
+
+    return {
+      ...process.env,
+      PATH: mergedPath,
+    };
+  }
+
   public static async testConnection(): Promise<{ success: boolean; version?: string; error?: string }> {
     return new Promise(resolve => {
-      const proc = spawn('agy', ['--version']);
+      const proc = spawn('agy', ['--version'], { env: this.getSpawnEnv() });
       let output = '';
       let errOutput = '';
 
@@ -221,7 +241,7 @@ Generate between 3 to 5 scenes, total duration between 18 to 30 seconds.
 Ensure each visualPrompt is descriptive and visual (avoid text overlays in the prompt, focus on camera motion, subject, lighting, environment).`;
 
     return new Promise((resolve, reject) => {
-      const proc = spawn('agy', ['--print', systemPrompt]);
+      const proc = spawn('agy', ['--print', systemPrompt], { env: this.getSpawnEnv() });
       let stdout = '';
       let stderr = '';
 

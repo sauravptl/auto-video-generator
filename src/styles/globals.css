@@ -3,8 +3,33 @@
 @tailwind utilities;
 
 :root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --studio-950: #f8fafc;
+  --studio-900: #ffffff;
+  --studio-850: #f1f5f9;
+  --studio-800: #e2e8f0;
+  --studio-700: #cbd5e1;
+  --studio-600: #94a3b8;
+  --studio-500: #64748b;
+  --card-glass: rgba(255, 255, 255, 0.88);
+  --panel-glass: rgba(255, 255, 255, 0.94);
+  --border-glass: rgba(0, 0, 0, 0.08);
+}
+
+.dark {
   --background: #090a0f;
   --foreground: #f8fafc;
+  --studio-950: #090a0f;
+  --studio-900: #10121a;
+  --studio-850: #151824;
+  --studio-800: #1a1f2e;
+  --studio-700: #262e42;
+  --studio-600: #384461;
+  --studio-500: #4f5f87;
+  --card-glass: rgba(21, 24, 36, 0.6);
+  --panel-glass: rgba(16, 18, 26, 0.75);
+  --border-glass: rgba(255, 255, 255, 0.08);
 }
 
 body {
@@ -13,6 +38,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   overflow-x: hidden;
   user-select: none;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* Custom scrollbars */
@@ -22,34 +48,69 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #10121a;
+  background: var(--studio-900);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #262e42;
+  background: var(--studio-700);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #384461;
+  background: var(--studio-600);
 }
 
 /* Glassmorphism helpers */
 .glass-panel {
-  background: rgba(16, 18, 26, 0.75);
+  background: var(--panel-glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-glass);
 }
 
 .glass-card {
-  background: rgba(21, 24, 36, 0.6);
+  background: var(--card-glass);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  transition: all 0.2s ease-in-out;
 }
 
 .glass-card:hover {
-  border-color: rgba(139, 92, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.35);
+}
+
+/* Light mode specific element text and border contrasts */
+html:not(.dark) .text-slate-100 {
+  color: #0f172a;
+}
+
+html:not(.dark) .text-slate-200 {
+  color: #1e293b;
+}
+
+html:not(.dark) .text-slate-300 {
+  color: #334155;
+}
+
+html:not(.dark) .text-slate-400 {
+  color: #64748b;
+}
+
+html:not(.dark) input,
+html:not(.dark) textarea,
+html:not(.dark) select {
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #94a3b8;
+}
+
+html:not(.dark) .glass-card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 /* Draggable titlebar area for macOS Electron */
@@ -107,4 +168,3 @@ body {
 .animate-pulse-glow {
   animation: pulseGlow 2.5s ease-in-out infinite;
 }
-

@@ -4,6 +4,9 @@ export const IPC_CHANNELS = {
   SYSTEM_OPEN_PATH: 'system:open-path',
   SYSTEM_OPEN_EXTERNAL: 'system:open-external',
   SYSTEM_SELECT_IMAGES: 'system:select-images',
+  THEME_GET: 'theme:get',
+  THEME_SET: 'theme:set',
+  THEME_CHANGED: 'theme:changed',
 
   // Flow Connector
   FLOW_GET_STATUS: 'flow:get-status',

@@ -78,7 +78,7 @@ export default function DashboardPage() {
               <span>Full Automation: Topic ➔ Script ➔ Flow ➔ FFmpeg ➔ Meta</span>
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-              Auto AI Video Production
+              CineFlow AI Studio
             </h1>
             <p className="text-sm text-slate-400 leading-relaxed">
               Generate multi-scene reels and widescreen videos using Google Flow (Veo 3.1) and AGY CLI.

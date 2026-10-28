@@ -19,6 +19,7 @@ import {
   X,
   Info,
   CheckCircle2,
+  AlertTriangle,
 } from 'lucide-react';
 import type { VideoFormat, PublishTargets } from '@/shared/types';
 
@@ -48,6 +49,7 @@ export default function NewProjectPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [agyToast, setAgyToast] = useState<{ show: boolean; message: string } | null>(null);
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -178,6 +180,17 @@ Narration: Follow us for daily breakthrough insights shaping the future!`;
     setIsSubmitting(true);
     try {
       if (typeof window !== 'undefined' && window.electronAPI) {
+        // Pre-generation check: verify AGY CLI availability
+        const agyCheck = await window.electronAPI.agy.testConnection();
+        if (!agyCheck.success) {
+          setAgyToast({
+            show: true,
+            message: agyCheck.error || 'Antigravity AI (AGY) CLI is not installed or not found in system PATH. Install it to generate AI video storyboards.',
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
         // Collect image paths (file path or data url)
         const imagePayload = images.map(img => img.path);
 
@@ -639,6 +652,52 @@ Narration: Follow us for daily breakthrough insights shaping the future!`;
           <ArrowRight className="h-5 w-5" />
         </button>
       </form>
+
+      {/* AGY Missing Error Toast */}
+      {agyToast?.show && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md rounded-2xl border border-rose-500/40 bg-studio-900/95 p-4 shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-5 duration-200">
+          <div className="flex items-start space-x-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold text-white">AGY CLI Engine Required</h4>
+                <button
+                  type="button"
+                  onClick={() => setAgyToast(null)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                {agyToast.message}
+              </p>
+              <div className="pt-2 flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAgyToast(null);
+                    window.dispatchEvent(new CustomEvent('open-agy-tutorial'));
+                  }}
+                  className="flex items-center space-x-1.5 rounded-lg bg-gradient-to-r from-accent-purple to-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-purple-500/20 hover:opacity-90 transition-all active:scale-95"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Open AGY Setup Tutorial</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAgyToast(null)}
+                  className="rounded-lg px-2.5 py-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

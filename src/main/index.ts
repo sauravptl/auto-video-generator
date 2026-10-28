@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, dialog, protocol, net } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, dialog, protocol, net, nativeTheme } from 'electron';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import { IPC_CHANNELS } from '../shared/ipc-channels';
@@ -32,12 +32,14 @@ const isDev = process.env.NODE_ENV !== 'production' || !app.isPackaged;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
+    title: 'CineFlow AI',
+    icon: path.join(__dirname, '../../build/icon.png'),
     width: 1280,
     height: 860,
     minWidth: 1024,
     minHeight: 700,
     titleBarStyle: 'hiddenInset',
-    backgroundColor: '#090a0f',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#090a0f' : '#f8fafc',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -136,6 +138,27 @@ function registerIpcHandlers() {
       ],
     });
     return result.canceled ? [] : result.filePaths;
+  });
+
+  // Native Theme Controls
+  ipcMain.handle(IPC_CHANNELS.THEME_GET, async () => {
+    return {
+      theme: nativeTheme.themeSource,
+      shouldUseDarkColors: nativeTheme.shouldUseDarkColors,
+    };
+  });
+
+  ipcMain.handle(IPC_CHANNELS.THEME_SET, async (_event, theme: 'dark' | 'light' | 'system') => {
+    nativeTheme.themeSource = theme;
+    const isDark = nativeTheme.shouldUseDarkColors;
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.setBackgroundColor(isDark ? '#090a0f' : '#f8fafc');
+      mainWindow.webContents.send(IPC_CHANNELS.THEME_CHANGED, {
+        theme,
+        shouldUseDarkColors: isDark,
+      });
+    }
+    return { success: true, theme, shouldUseDarkColors: isDark };
   });
 
   // Flow Connector

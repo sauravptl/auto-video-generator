@@ -18,7 +18,11 @@ import {
   Instagram,
   Check,
   ExternalLink,
+  Sun,
+  Moon,
+  HelpCircle,
 } from 'lucide-react';
+import { useTheme } from '@/components/theme/ThemeProvider';
 import type { FlowStatus } from '@/shared/flow-types';
 import type { MetaConnectionStatus, FacebookPage } from '@/shared/meta-types';
 
@@ -31,6 +35,7 @@ export function TopBar() {
   const [isSwitchingPage, setIsSwitchingPage] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { resolvedTheme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.electronAPI) {
@@ -142,7 +147,7 @@ export function TopBar() {
             <Sparkles className="h-4 w-4 text-white" />
           </div>
           <span className="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text font-bold tracking-tight text-transparent">
-            Auto AI Video
+            CineFlow AI
           </span>
         </div>
 
@@ -318,6 +323,29 @@ export function TopBar() {
             </span>
           )}
         </div>
+
+        {/* AGY Tutorial Guide Button */}
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('open-agy-tutorial'))}
+          title="Open AGY CLI Setup & Verification Tutorial"
+          className="flex items-center space-x-1.5 rounded-lg border border-studio-700/80 bg-studio-900/80 px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:text-white hover:border-studio-600 transition-all active:scale-95"
+        >
+          <Sparkles className="h-3.5 w-3.5 text-accent-pink" />
+          <span className="hidden xl:inline">AGY Guide</span>
+        </button>
+
+        {/* Dark / Light Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          title={`Switch to ${resolvedTheme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-studio-700/80 bg-studio-900/80 text-slate-300 hover:text-white hover:border-studio-600 transition-all active:scale-95"
+        >
+          {resolvedTheme === 'dark' ? (
+            <Sun className="h-4 w-4 text-amber-400" />
+          ) : (
+            <Moon className="h-4 w-4 text-accent-purple" />
+          )}
+        </button>
 
         {/* Snap Side-by-Side Button (Electron Left, Chrome Right) */}
         <button

@@ -15,6 +15,19 @@ export const electronAPI = {
   selectImages: (): Promise<string[]> =>
     ipcRenderer.invoke(IPC_CHANNELS.SYSTEM_SELECT_IMAGES),
 
+  // Theme
+  theme: {
+    get: (): Promise<{ theme: string; shouldUseDarkColors: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.THEME_GET),
+    set: (theme: 'dark' | 'light' | 'system'): Promise<{ success: boolean; theme: string; shouldUseDarkColors: boolean }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.THEME_SET, theme),
+    onChange: (callback: (data: { theme: string; shouldUseDarkColors: boolean }) => void) => {
+      const sub = (_e: unknown, data: any) => callback(data);
+      ipcRenderer.on(IPC_CHANNELS.THEME_CHANGED, sub);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.THEME_CHANGED, sub);
+    },
+  },
+
   // Flow Connector
   flow: {
     getStatus: (): Promise<FlowStatus> =>
