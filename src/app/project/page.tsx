@@ -36,6 +36,9 @@ import {
   RefreshCw,
   Save,
   X,
+  Volume2,
+  Sliders,
+  Maximize2,
 } from 'lucide-react';
 import type { Project, SceneDefinition, PublishTargets } from '@/shared/types';
 import type { MetaConnectionStatus } from '@/shared/meta-types';
@@ -52,6 +55,7 @@ function ProjectTrackerContent() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishFeedback, setPublishFeedback] = useState<string | null>(null);
   const [isSnapping, setIsSnapping] = useState(false);
+  const [activeScenePreviewIdx, setActiveScenePreviewIdx] = useState<number>(0);
 
   // Scene editing states
   const [editingSceneIdx, setEditingSceneIdx] = useState<number | null>(null);
@@ -79,7 +83,6 @@ function ProjectTrackerContent() {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.electronAPI && projectId) {
-      // 1. Initial Project Fetch
       window.electronAPI.projects.get(projectId).then(p => {
         if (p) {
           setProject(p);
@@ -91,10 +94,8 @@ function ProjectTrackerContent() {
         setLoading(false);
       });
 
-      // 2. Fetch Meta status
       window.electronAPI.meta.getStatus().then(setMetaStatus).catch(console.error);
 
-      // Listen for Meta status changes
       const unsubscribeMeta = window.electronAPI.meta.onStatusChange?.(status => {
         setMetaStatus(status);
       });
@@ -108,7 +109,6 @@ function ProjectTrackerContent() {
       };
       window.addEventListener('meta-status-updated', handleMetaCustomEvent);
 
-      // Listen for live pipeline updates via IPC
       const unsubscribeProgress = window.electronAPI.projects.onProgress(updated => {
         if (updated.id === projectId) {
           setProject(updated);
@@ -121,7 +121,6 @@ function ProjectTrackerContent() {
         }
       });
 
-      // Poll every 2.5s to ensure UI stays perfectly synchronized with background stages
       const pollInterval = setInterval(() => {
         window.electronAPI.projects.get(projectId).then(p => {
           if (p) {
@@ -229,7 +228,6 @@ function ProjectTrackerContent() {
       setRetryingSceneIdx(sceneIndex);
       setRetryError(prev => ({ ...prev, [sceneIndex]: '' }));
 
-      // If user had edits open, save them first
       const scenePrompt = editingSceneIdx === sceneIndex ? tempPrompt : undefined;
 
       try {
@@ -286,7 +284,7 @@ function ProjectTrackerContent() {
         project.publishTargets = selectedTargets;
         await window.electronAPI.projects.update(project);
 
-        const results = await window.electronAPI.meta.publish(project.id, selectedTargets);
+        await window.electronAPI.meta.publish(project.id, selectedTargets);
         const updated = await window.electronAPI.projects.get(project.id);
         if (updated) setProject(updated);
         setPublishFeedback('Publishing process finished successfully!');
@@ -315,7 +313,7 @@ function ProjectTrackerContent() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-accent-purple" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-lime-500 dark:border-[#BFF97E] border-t-transparent" />
       </div>
     );
   }
@@ -323,10 +321,10 @@ function ProjectTrackerContent() {
   if (!project) {
     return (
       <div className="flex h-64 flex-col items-center justify-center space-y-4 text-center">
-        <p className="text-slate-400">Project not found or was removed.</p>
+        <p className="text-slate-500 dark:text-slate-400">Project not found or was removed.</p>
         <Link
           href="/"
-          className="rounded-lg bg-studio-800 px-4 py-2 text-xs font-semibold text-white hover:bg-studio-700"
+          className="pill-btn-lime px-5 py-2 text-xs font-bold text-black"
         >
           Return to Dashboard
         </Link>
@@ -384,66 +382,65 @@ function ProjectTrackerContent() {
   const totalScenes = scenes.length;
   const allScenesComplete = totalScenes > 0 && completedScenes === totalScenes;
 
-  // Stream URL helper for local files — uses Electron's custom media:// protocol
   const getVideoUrl = (filePath?: string) => {
     if (!filePath) return '';
     return `media://${filePath}`;
   };
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="flex flex-col space-y-8 pb-24 max-w-7xl mx-auto">
       {/* Top Header with Back, Title, and Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3.5">
           <Link
             href="/"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-studio-800 bg-studio-900 text-slate-400 hover:text-white transition-colors"
+            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:border-lime-400 dark:hover:border-[#BFF97E]/40 transition-colors shadow-sm"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-bold text-white line-clamp-1">{project.title}</h1>
+            <div className="flex items-center space-x-2.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white line-clamp-1">
+                {project.title}
+              </h1>
               {isScriptReady && (
-                <span className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-blue-500/20 border border-blue-500/40 text-[10px] text-blue-300 font-semibold">
+                <span className="flex items-center space-x-1 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-500/20 border border-blue-300 dark:border-blue-500/40 text-[11px] text-blue-800 dark:text-blue-300 font-bold">
                   <span>Script Ready</span>
                 </span>
               )}
               {isGenerating && (
-                <span className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-accent-purple/20 border border-accent-purple/30 text-[10px] text-accent-purple font-semibold animate-pulse">
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent-purple" />
+                <span className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-lime-100 dark:bg-[#BFF97E]/20 border border-lime-300 dark:border-[#BFF97E]/40 text-lime-800 dark:text-[#BFF97E] font-bold animate-pulse">
+                  <span className="h-1.5 w-1.5 rounded-full bg-lime-500 dark:bg-[#BFF97E]" />
                   <span>Generating Video</span>
                 </span>
               )}
               {isPaused && (
-                <span className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-[10px] text-amber-300 font-semibold">
+                <span className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 text-amber-800 dark:text-amber-300 font-bold">
                   <Pause className="h-3 w-3" />
-                  <span>Generation Paused</span>
+                  <span>Paused</span>
                 </span>
               )}
               {isAssembledOrDone && (
-                <span className="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-[10px] text-emerald-400 font-semibold">
-                  <CheckCircle2 className="h-3 w-3" />
-                  <span>Ready for Review</span>
+                <span className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 font-bold">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span>Ready for Export</span>
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-400 line-clamp-1 mt-0.5">{project.topic}</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 mt-1 max-w-2xl">{project.topic}</p>
           </div>
         </div>
 
         {/* Action Buttons in Header */}
-        <div className="flex items-center space-x-2">
-          {/* Pause / Resume Controls */}
+        <div className="flex items-center space-x-2.5">
           {isGenerating && (
             <button
               onClick={handlePauseGeneration}
               disabled={isPausingOrResuming}
-              className="inline-flex items-center space-x-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-500/20 transition-all shadow-sm"
-              title="Pause video scene generation in Google Flow"
+              className="inline-flex items-center space-x-1.5 rounded-full border border-amber-400 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-all shadow-sm"
             >
               <Pause className="h-3.5 w-3.5" />
-              <span>{isPausingOrResuming ? 'Pausing...' : 'Pause Generation'}</span>
+              <span>{isPausingOrResuming ? 'Pausing...' : 'Pause'}</span>
             </button>
           )}
 
@@ -451,10 +448,9 @@ function ProjectTrackerContent() {
             <button
               onClick={handleResumeGeneration}
               disabled={isPausingOrResuming}
-              className="inline-flex items-center space-x-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-500 transition-all shadow-md shadow-emerald-500/20"
-              title="Resume generation from where it paused"
+              className="inline-flex items-center space-x-1.5 rounded-full pill-btn-lime px-4 py-2 text-xs font-bold text-black"
             >
-              <Play className="h-3.5 w-3.5" />
+              <Play className="h-3.5 w-3.5 fill-black" />
               <span>{isPausingOrResuming ? 'Resuming...' : 'Resume Generation'}</span>
             </button>
           )}
@@ -462,17 +458,27 @@ function ProjectTrackerContent() {
           {hasOutputVideos && (
             <button
               onClick={handleOpenFolder}
-              className="inline-flex items-center space-x-1.5 rounded-lg border border-studio-700 bg-studio-900 px-3 py-2 text-xs font-medium text-slate-300 hover:bg-studio-800 hover:text-white transition-colors"
+              className="inline-flex items-center space-x-1.5 rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-black dark:hover:text-white transition-colors shadow-sm"
             >
               <FolderOpen className="h-3.5 w-3.5" />
-              <span>Show in Finder</span>
+              <span>Finder</span>
+            </button>
+          )}
+
+          {hasOutputVideos && (
+            <button
+              onClick={handleOpenFolder}
+              className="inline-flex items-center space-x-1.5 pill-btn-lime px-5 py-2 text-xs font-bold text-black shadow-md shadow-[#BFF97E]/20"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>Download Video</span>
             </button>
           )}
 
           {project.status === 'scenes_ready' && (
             <button
               onClick={handleManualAssemble}
-              className="inline-flex items-center space-x-1.5 rounded-lg bg-accent-purple px-3 py-2 text-xs font-semibold text-white hover:bg-accent-purple/90 shadow-md shadow-purple-500/20 transition-all"
+              className="inline-flex items-center space-x-1.5 pill-btn-lime px-5 py-2 text-xs font-bold text-black shadow-md shadow-[#BFF97E]/20 transition-all"
             >
               <Film className="h-3.5 w-3.5" />
               <span>Assemble Now</span>
@@ -481,39 +487,36 @@ function ProjectTrackerContent() {
         </div>
       </div>
 
-      {/* ========================================================= */}
-      {/* 1. SCRIPT REVIEW & "START GENERATING VIDEO" BANNER        */}
-      {/* Allows user to inspect and edit before kicking off video   */}
-      {/* ========================================================= */}
+      {/* Script Ready Callout Banner */}
       {isScriptReady && (
-        <div className="relative overflow-hidden rounded-2xl border-2 border-accent-purple/50 bg-gradient-to-r from-accent-purple/15 via-studio-900 to-indigo-950/40 p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="inline-flex items-center space-x-2 text-xs font-bold text-accent-purple uppercase tracking-wider">
-                <Sparkles className="h-4 w-4" />
+        <div className="relative overflow-hidden rounded-3xl border border-lime-300 dark:border-[#BFF97E]/40 bg-gradient-to-r from-lime-50 via-white to-emerald-50 dark:from-[#121612] dark:via-[#161c16] dark:to-[#0c0f0c] p-7 shadow-sm dark:shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center space-x-2 text-xs font-bold text-lime-700 dark:text-[#BFF97E] uppercase tracking-wider">
+                <Sparkles className="h-4 w-4 text-lime-600 dark:text-[#BFF97E]" />
                 <span>Script Generated & Ready for Review</span>
               </div>
-              <h2 className="text-xl font-bold text-white">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
                 Review Scenes & Start Video Generation
               </h2>
-              <p className="text-xs text-slate-300 max-w-xl">
-                The AI scriptwriter has created {totalScenes} scenes. You can edit visual prompts, narrations, or durations directly below. When satisfied, click below to generate all scenes in Google Flow.
+              <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
+                The AI scriptwriter created {totalScenes} scenes. You can adjust visual prompts below. When satisfied, launch the Google Flow pipeline.
               </p>
             </div>
 
             <button
               onClick={handleStartScenes}
               disabled={isStartingScenes}
-              className="inline-flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-accent-purple via-indigo-600 to-pink-600 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-purple-500/30 hover:opacity-95 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0"
+              className="pill-btn-lime px-8 py-4 text-sm font-bold text-black flex items-center space-x-2 shadow-xl hover:opacity-95 shrink-0"
             >
               {isStartingScenes ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin text-black" />
                   <span>Starting Google Flow...</span>
                 </>
               ) : (
                 <>
-                  <Play className="h-4 w-4 fill-white" />
+                  <Play className="h-4 w-4 fill-black" />
                   <span>Start Generating Video (Google Flow)</span>
                 </>
               )}
@@ -522,31 +525,24 @@ function ProjectTrackerContent() {
         </div>
       )}
 
-      {/* ========================================================= */}
-      {/* 2. ANIMATED PROGRESS & STAGE TRACKER CARD                */}
-      {/* ========================================================= */}
-      <div className="relative overflow-hidden rounded-2xl border border-studio-800 bg-studio-900/90 p-6 space-y-6 shadow-xl">
-        {/* Ambient subtle background glow while generating */}
-        {isGenerating && (
-          <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-accent-purple/10 blur-3xl pointer-events-none" />
-        )}
-
+      {/* Progress & Milestones Tracker */}
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/85 p-6 space-y-6 shadow-sm dark:shadow-xl backdrop-blur-2xl">
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs font-medium">
-            <span className="text-slate-200 font-medium flex items-center space-x-2.5">
+            <span className="text-slate-800 dark:text-slate-200 font-semibold flex items-center space-x-2.5">
               <span className="relative flex h-2.5 w-2.5">
                 {isGenerating && (
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-purple opacity-75"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-500 dark:bg-[#BFF97E] opacity-75"></span>
                 )}
                 <span
                   className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
                     isGenerating
-                      ? 'bg-accent-purple'
+                      ? 'bg-lime-500 dark:bg-[#BFF97E]'
                       : isPaused
                       ? 'bg-amber-400'
                       : isAssembledOrDone
                       ? 'bg-emerald-400'
-                      : 'bg-studio-600'
+                      : 'bg-slate-300 dark:bg-white/20'
                   }`}
                 />
               </span>
@@ -554,84 +550,64 @@ function ProjectTrackerContent() {
             </span>
 
             <div className="flex items-center space-x-3">
-              {isGenerating && (
-                <button
-                  onClick={handlePauseGeneration}
-                  disabled={isPausingOrResuming}
-                  className="text-[11px] text-amber-300 hover:text-amber-200 underline font-semibold flex items-center space-x-1"
-                >
-                  <Pause className="h-3 w-3" />
-                  <span>Pause</span>
-                </button>
-              )}
-              {isPaused && (
-                <button
-                  onClick={handleResumeGeneration}
-                  disabled={isPausingOrResuming}
-                  className="text-[11px] text-emerald-400 hover:text-emerald-300 underline font-semibold flex items-center space-x-1"
-                >
-                  <Play className="h-3 w-3" />
-                  <span>Resume</span>
-                </button>
-              )}
-              <span className="font-mono text-sm font-bold text-accent-purple">
+              <span className="font-mono text-sm font-bold text-lime-700 dark:text-[#BFF97E]">
                 {project.progressPercent}%
               </span>
             </div>
           </div>
 
-          {/* Animated Main Progress Bar */}
-          <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-studio-800">
+          {/* Lime/Mint Gradient Progress Bar */}
+          <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/5">
             <div
               className={`h-full rounded-full transition-all duration-500 ease-out ${
                 isPaused
                   ? 'bg-amber-500'
-                  : 'bg-gradient-to-r from-accent-purple via-indigo-500 to-accent-pink'
+                  : 'bg-gradient-to-r from-lime-400 via-emerald-400 to-teal-400 dark:from-[#BFF97E] dark:via-[#98F899] dark:to-[#CCFFEA]'
               }`}
               style={{ width: `${project.progressPercent}%` }}
             >
               {isGenerating && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
               )}
             </div>
           </div>
         </div>
 
         {/* 4-Stage Visual Milestones */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {stages.map(st => {
             const Icon = st.icon;
             return (
               <div
                 key={st.key}
-                className={`flex items-center space-x-3 rounded-xl border p-3 transition-all ${
+                className={`flex items-center space-x-3 rounded-2xl border p-3.5 transition-all ${
                   st.done
-                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
+                    ? 'border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
                     : st.active
-                    ? 'border-accent-purple/60 bg-accent-purple/15 text-accent-purple shadow-lg shadow-purple-500/15'
-                    : 'border-studio-800 bg-studio-950/40 text-slate-500'
+                    ? 'border-lime-500 dark:border-[#BFF97E]/60 bg-lime-50/80 dark:bg-[#BFF97E]/10 text-slate-900 dark:text-white shadow-md dark:shadow-lg dark:shadow-[#BFF97E]/10'
+                    : 'border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20 text-slate-500'
                 }`}
               >
                 <div
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
                     st.done
-                      ? 'bg-emerald-500/20 text-emerald-400'
+                      ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold'
                       : st.active
-                      ? 'bg-accent-purple text-white shadow-md'
-                      : 'bg-studio-800 text-slate-400'
+                      ? 'bg-lime-400 dark:bg-[#BFF97E] text-black font-bold shadow-md'
+                      : 'bg-slate-200 dark:bg-white/5 text-slate-500'
                   }`}
                 >
                   {st.active ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin text-black" />
                   ) : st.done ? (
-                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                    <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400 stroke-[3]" />
                   ) : (
-                    <Icon className="h-3.5 w-3.5" />
+                    <Icon className="h-4 w-4" />
                   )}
                 </div>
                 <div className="min-w-0">
-                  <span className="text-xs font-semibold block truncate">{st.label}</span>
-                  <span className="text-[10px] text-slate-400 block truncate">
+                  <span className="text-xs font-bold block truncate">{st.label}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
                     {st.done ? 'Completed' : st.active ? 'In Progress...' : 'Pending'}
                   </span>
                 </div>
@@ -639,392 +615,55 @@ function ProjectTrackerContent() {
             );
           })}
         </div>
-
-        {/* Google Flow Helper Banner (While Scene Generation is in flight) */}
-        {project.status === 'scenes_generating' && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-xs text-indigo-200">
-            <div className="flex items-center space-x-2">
-              <Columns2 className="h-4 w-4 text-accent-purple shrink-0" />
-              <span>
-                <strong>Google Flow Generation Active:</strong> Keep Chrome visible to avoid background throttling.
-              </span>
-            </div>
-            <button
-              onClick={handleSnapSideBySide}
-              disabled={isSnapping}
-              className="inline-flex items-center space-x-1.5 rounded-lg bg-accent-purple px-3 py-1.5 text-xs font-bold text-white hover:bg-accent-purple/90 shadow transition-all shrink-0"
-            >
-              <Columns2 className="h-3 w-3" />
-              <span>{isSnapping ? 'Snapping...' : 'Snap Chrome Side-by-Side'}</span>
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* ========================================================= */}
-      {/* 3. SCRIPT & PER-SCENE STORYBOARD (EDITABLE + REGENERATE)  */}
-      {/* Clean text wrap, no cut-offs, inline editing & retry       */}
-      {/* ========================================================= */}
-      {project.script && (
-        <div className="rounded-2xl border border-studio-800 bg-studio-900/80 p-6 space-y-6 shadow-lg">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-studio-800 pb-4">
-            <div>
-              <h3 className="text-base font-bold text-white flex items-center space-x-2">
-                <span>Scene Storyboard</span>
-                <span className="text-xs font-normal text-slate-400">
-                  ({completedScenes}/{totalScenes} Scenes Complete)
-                </span>
-              </h3>
-              <p className="text-xs text-slate-400">
-                Visual prompts send to Google Flow (Veo 3.1). Click &ldquo;Edit&rdquo; to modify prompts or &ldquo;Regenerate&rdquo; if rejected.
-              </p>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <span className="text-xs text-slate-400 font-mono">
-                ~{project.script.targetDurationSeconds}s total
-              </span>
-
-              {isScriptReady && (
-                <button
-                  onClick={handleStartScenes}
-                  disabled={isStartingScenes}
-                  className="inline-flex items-center space-x-1.5 rounded-lg bg-accent-purple px-3 py-1.5 text-xs font-bold text-white hover:bg-accent-purple/90 shadow-md shadow-purple-500/20 transition-all"
-                >
-                  <Play className="h-3 w-3 fill-white" />
-                  <span>Start Generating</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {scenes.map((scene, idx) => {
-              const sceneVideo = scene.clipPath916 || scene.clipPath169;
-              const isCurrentSceneGenerating = scene.status === 'generating' || retryingSceneIdx === scene.sceneIndex;
-              const isSceneFailed = scene.status === 'failed' || !!scene.error;
-              const isSceneComplete = (scene.status === 'completed' || !!sceneVideo) && !isSceneFailed;
-              const isScenePending = !isCurrentSceneGenerating && !isSceneComplete && !isSceneFailed;
-              const isEditing = editingSceneIdx === scene.sceneIndex;
-
-              // Calculate per-scene progress
-              let sceneProgress = 0;
-              if (isSceneComplete) sceneProgress = 100;
-              else if (isCurrentSceneGenerating) sceneProgress = 45;
-
-              return (
-                <div
-                  key={idx}
-                  className={`rounded-xl border transition-all ${
-                    isSceneFailed
-                      ? 'border-rose-500/50 bg-rose-500/5 shadow-lg shadow-rose-500/10'
-                      : isCurrentSceneGenerating
-                      ? 'border-accent-purple/60 bg-accent-purple/5 shadow-lg shadow-purple-500/10'
-                      : isSceneComplete
-                      ? 'border-emerald-500/30 bg-emerald-500/5'
-                      : 'border-studio-800 bg-studio-950/60'
-                  }`}
-                >
-                  {/* Scene Header */}
-                  <div className="flex items-center justify-between p-4 pb-0">
-                    <div className="flex items-center space-x-2.5">
-                      {isCurrentSceneGenerating && (
-                        <span className="h-2.5 w-2.5 rounded-full bg-accent-purple animate-ping" />
-                      )}
-                      {isSceneComplete && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}
-                      {isSceneFailed && <AlertCircle className="h-4 w-4 text-rose-400" />}
-                      {isScenePending && <Clock className="h-4 w-4 text-slate-500" />}
-
-                      <span className="text-sm font-bold text-white">Scene {idx + 1}</span>
-                      <span className="rounded bg-studio-800 px-1.5 py-0.5 text-[10px] text-slate-300 font-mono">
-                        {scene.durationSeconds}s
-                      </span>
-                      {scene.model && (
-                        <span className="rounded bg-purple-500/10 border border-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-300 font-mono">
-                          {scene.model}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className={`text-[10px] font-semibold uppercase tracking-wider ${
-                          isSceneComplete
-                            ? 'text-emerald-400'
-                            : isSceneFailed
-                            ? 'text-rose-400'
-                            : isCurrentSceneGenerating
-                            ? 'text-accent-purple'
-                            : 'text-slate-500'
-                        }`}
-                      >
-                        {isSceneComplete
-                          ? '✓ Ready'
-                          : isSceneFailed
-                          ? '⚠️ Failed / Rejected'
-                          : isCurrentSceneGenerating
-                          ? 'Rendering...'
-                          : 'Pending'}
-                      </span>
-
-                      {/* Regenerate / Retry button */}
-                      <button
-                        onClick={() => handleRetryScene(scene.sceneIndex)}
-                        disabled={isCurrentSceneGenerating}
-                        className="inline-flex items-center space-x-1 px-2 py-1 rounded bg-studio-800 text-[10px] font-medium text-slate-300 hover:text-white hover:bg-studio-700 transition-colors disabled:opacity-50"
-                        title="Regenerate this scene clip with Google Flow"
-                      >
-                        <RotateCcw className={`h-2.5 w-2.5 ${isCurrentSceneGenerating ? 'animate-spin' : ''}`} />
-                        <span>Regenerate</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Failure / Policy Rejection Banner */}
-                  {(isSceneFailed || retryError[scene.sceneIndex]) && (
-                    <div className="mx-4 mt-3 p-3 rounded-lg border border-rose-500/40 bg-rose-500/10 text-xs text-rose-200 space-y-1">
-                      <div className="flex items-center space-x-1.5 font-bold text-rose-300">
-                        <AlertTriangle className="h-3.5 w-3.5" />
-                        <span>Generation Failed or Policy Filter Triggered</span>
-                      </div>
-                      <p className="text-[11px] text-rose-200">
-                        {retryError[scene.sceneIndex] || scene.error || 'Google Flow rejected the prompt or hit safe search.'}
-                      </p>
-                      <p className="text-[10px] text-slate-300">
-                        💡 Tip: Click &ldquo;Edit Prompt&rdquo; below to soften controversial words, then click Regenerate.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Per-Scene Loading Bar */}
-                  {(isCurrentSceneGenerating || isSceneComplete) && !isSceneFailed && (
-                    <div className="px-4 pt-2">
-                      <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-studio-800/80">
-                        <div
-                          className={`h-full rounded-full transition-all duration-700 ease-out ${
-                            isSceneComplete
-                              ? 'bg-emerald-500 w-full'
-                              : 'bg-gradient-to-r from-accent-purple to-indigo-500'
-                          }`}
-                          style={{ width: `${sceneProgress}%` }}
-                        >
-                          {isCurrentSceneGenerating && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="text-[10px] text-slate-400">
-                          {isSceneComplete ? 'Video clip ready' : 'Google Flow rendering in Chrome...'}
-                        </span>
-                        {isCurrentSceneGenerating && (
-                          <span className="text-[10px] text-accent-purple font-mono animate-pulse">
-                            <Download className="inline h-3 w-3 mr-0.5" />
-                            Waiting for download...
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Scene Content: Video Preview OR Prompt */}
-                  <div className="p-4 pt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Left: Video Preview or placeholder */}
-                    <div>
-                      {sceneVideo ? (
-                        <div className="relative rounded-lg overflow-hidden border border-emerald-500/30 aspect-video bg-black shadow-md">
-                          <video
-                            src={getVideoUrl(sceneVideo)}
-                            controls
-                            className="w-full h-full object-cover"
-                            preload="metadata"
-                          />
-                          <span className="absolute top-2 right-2 text-[9px] bg-emerald-500/90 text-white px-1.5 py-0.5 rounded font-bold shadow">
-                            ✓ Ready
-                          </span>
-                        </div>
-                      ) : isCurrentSceneGenerating ? (
-                        <div className="relative rounded-lg overflow-hidden border border-accent-purple/40 aspect-video bg-studio-950 flex flex-col items-center justify-center p-3 text-center space-y-2">
-                          <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-accent-purple to-transparent opacity-60 animate-scanline pointer-events-none" />
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-transparent animate-shimmer pointer-events-none" />
-                          <Loader2 className="h-6 w-6 animate-spin text-accent-purple" />
-                          <span className="text-[11px] font-semibold text-purple-300">
-                            Rendering in Google Flow...
-                          </span>
-                          <span className="text-[9px] text-slate-400">
-                            Clip will appear here automatically when downloaded
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="relative rounded-lg overflow-hidden border border-studio-800 aspect-video bg-studio-950/80 flex flex-col items-center justify-center text-slate-500 text-[11px] p-3 text-center">
-                          <Clock className="h-5 w-5 mb-1 text-slate-600" />
-                          <span>Waiting to generate</span>
-                          <span className="text-[9px] text-slate-600 mt-0.5">
-                            Google Flow will generate clip here
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Right: Visual Prompt & Subtitle (Full Text Wrap, Editable) */}
-                    <div className="space-y-3 flex flex-col justify-between">
-                      {isEditing ? (
-                        /* Inline Scene Edit Form */
-                        <div className="space-y-3 bg-studio-950/90 p-3.5 rounded-xl border border-accent-purple/50">
-                          <div>
-                            <label className="text-[10px] text-accent-purple uppercase tracking-wider font-bold block mb-1">
-                              Edit Visual Prompt (Google Flow)
-                            </label>
-                            <textarea
-                              value={tempPrompt}
-                              onChange={e => setTempPrompt(e.target.value)}
-                              rows={4}
-                              className="w-full text-xs font-mono bg-studio-900 p-2.5 rounded-lg border border-studio-700 focus:border-accent-purple focus:outline-none focus:ring-1 focus:ring-accent-purple text-slate-100 leading-relaxed resize-y"
-                              placeholder="Enter detailed cinematic prompt..."
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-1">
-                              Edit Subtitle / Narration
-                            </label>
-                            <input
-                              type="text"
-                              value={tempNarration}
-                              onChange={e => setTempNarration(e.target.value)}
-                              className="w-full text-xs bg-studio-900 p-2 rounded-lg border border-studio-700 focus:border-accent-purple focus:outline-none text-slate-200"
-                            />
-                          </div>
-
-                          <div className="flex items-center justify-end space-x-2 pt-1">
-                            <button
-                              onClick={() => setEditingSceneIdx(null)}
-                              className="px-2.5 py-1 text-xs text-slate-400 hover:text-white rounded border border-studio-700 hover:bg-studio-800"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              onClick={() => handleSaveSceneEdit(scene.sceneIndex)}
-                              className="inline-flex items-center space-x-1 px-3 py-1 text-xs font-bold text-white rounded bg-accent-purple hover:bg-accent-purple/90 shadow"
-                            >
-                              <Save className="h-3 w-3" />
-                              <span>Save Changes</span>
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        /* Normal Scene View (No Cut-offs, Full Text Display) */
-                        <>
-                          <div>
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                                Visual Prompt
-                              </span>
-                              <button
-                                onClick={() =>
-                                  handleStartEditingScene(
-                                    scene.sceneIndex,
-                                    scene.visualPrompt,
-                                    scene.narrationOrSubtitle
-                                  )
-                                }
-                                className="text-[10px] text-accent-purple hover:text-purple-300 font-semibold flex items-center space-x-0.5"
-                              >
-                                <Edit3 className="h-2.5 w-2.5" />
-                                <span>Edit</span>
-                              </button>
-                            </div>
-                            {/* Full text with break-words and pre-wrap so it NEVER cuts off */}
-                            <div className="text-xs text-slate-200 leading-relaxed font-mono bg-studio-900/90 p-3 rounded-lg border border-studio-800 break-words whitespace-pre-wrap select-text max-h-48 overflow-y-auto">
-                              &ldquo;{scene.visualPrompt}&rdquo;
-                            </div>
-                          </div>
-
-                          <div>
-                            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold block mb-1">
-                              Subtitle / Voiceover
-                            </span>
-                            <div className="text-xs text-purple-300 italic font-medium bg-purple-500/5 p-2 rounded-lg border border-purple-500/10 break-words whitespace-pre-wrap">
-                              &ldquo;{scene.narrationOrSubtitle}&rdquo;
-                            </div>
-                          </div>
-
-                          {scene.transition && (
-                            <div className="flex items-center space-x-2 pt-1">
-                              <span className="text-[10px] text-slate-400">Transition:</span>
-                              <span className="rounded bg-studio-800 px-1.5 py-0.5 text-[10px] text-slate-300 capitalize">
-                                {scene.transition}
-                              </span>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* 4. FINAL VIDEO PREVIEW (BELOW SCENES)                     */}
-      {/* Shows loading until ALL scenes done & assembled            */}
-      {/* ========================================================= */}
-      <div className="rounded-2xl border border-studio-800 bg-studio-900/90 p-6 space-y-6 shadow-xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="space-y-0.5">
-            <h3 className="text-base font-bold text-white flex items-center space-x-2">
-              <Film className="h-4 w-4 text-accent-purple" />
-              <span>
-                {isAssembledOrDone ? 'Final Video Preview' : 'Final Video Output'}
-              </span>
+      {/* Main Video Cinema Player Frame */}
+      <div className="order-3 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-6 sm:p-8 space-y-6 shadow-sm dark:shadow-2xl backdrop-blur-2xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+              <Film className="h-4 w-4 text-lime-600 dark:text-[#BFF97E]" />
+              <span>{isAssembledOrDone ? 'Final Video Cinema' : 'Video Output Canvas'}</span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
               {isAssembledOrDone
-                ? 'Merged video with transitions, subtitles & audio ready for publishing'
-                : allScenesComplete && project.status === 'assembling'
-                ? 'FFmpeg is assembling all scenes into final video...'
-                : isScriptReady
-                ? 'Start video generation above to create scenes'
-                : `Waiting for all ${totalScenes} scenes to complete before assembly`}
+                ? 'High-definition video rendered with smooth scene cuts, voiceover narration, and background track.'
+                : 'Scenes will automatically merge here once all clips finish generating in Google Flow.'}
             </p>
           </div>
 
-          {/* Aspect ratio selector tabs */}
-          <div className="flex rounded-lg bg-studio-850 p-1 border border-studio-700/60 shrink-0">
+          {/* Aspect Ratio Switcher Segmented Pills */}
+          <div className="flex rounded-full bg-slate-100 dark:bg-black/40 p-1 border border-slate-200 dark:border-white/10 shrink-0">
             <button
               onClick={() => setActivePlayerTab('9:16')}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium flex items-center space-x-1.5 transition-all ${
+              className={`rounded-full px-4 py-1.5 text-xs font-bold flex items-center space-x-1.5 transition-all ${
                 activePlayerTab === '9:16'
-                  ? 'bg-accent-purple text-white shadow'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'pill-btn-lime shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <Smartphone className="h-3.5 w-3.5" />
-              <span>9:16 Vertical (Reels)</span>
+              <span>9:16 Vertical</span>
             </button>
             <button
               onClick={() => setActivePlayerTab('16:9')}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium flex items-center space-x-1.5 transition-all ${
+              className={`rounded-full px-4 py-1.5 text-xs font-bold flex items-center space-x-1.5 transition-all ${
                 activePlayerTab === '16:9'
-                  ? 'bg-accent-purple text-white shadow'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'pill-btn-lime shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <Tv className="h-3.5 w-3.5" />
-              <span>16:9 Landscape (Feed)</span>
+              <span>16:9 Widescreen</span>
             </button>
           </div>
         </div>
 
         {/* Video Viewer Container */}
-        <div className="flex justify-center bg-studio-950/95 rounded-2xl p-6 border border-studio-800 min-h-[460px] items-center">
-          {/* CASE A: Video is fully assembled -> Show real video player */}
+        <div className="flex justify-center bg-slate-950 dark:bg-black/60 rounded-3xl p-6 sm:p-8 border border-slate-800 dark:border-white/5 min-h-[480px] items-center">
           {isAssembledOrDone && hasOutputVideos ? (
             activePlayerTab === '9:16' && project.outputVideo916 ? (
-              <div className="relative mx-auto w-[280px] h-[497px] rounded-3xl overflow-hidden shadow-2xl border-4 border-studio-700 bg-black">
+              <div className="relative mx-auto w-[290px] h-[515px] rounded-[36px] overflow-hidden shadow-2xl border-4 border-white/15 bg-black">
                 <video
                   key={project.outputVideo916}
                   src={getVideoUrl(project.outputVideo916)}
@@ -1036,7 +675,7 @@ function ProjectTrackerContent() {
                 />
               </div>
             ) : project.outputVideo169 ? (
-              <div className="relative w-full max-w-2xl aspect-video rounded-xl overflow-hidden shadow-2xl border border-studio-700 bg-black">
+              <div className="relative w-full max-w-3xl aspect-video rounded-2xl overflow-hidden shadow-2xl border-2 border-white/15 bg-black">
                 <video
                   key={project.outputVideo169}
                   src={getVideoUrl(project.outputVideo169)}
@@ -1053,150 +692,79 @@ function ProjectTrackerContent() {
               </div>
             )
           ) : (
-            /* CASE B: Video is NOT assembled -> Show Loading Skeleton */
+            /* Generating / Skeleton State */
             <div className="w-full flex justify-center">
               {activePlayerTab === '9:16' ? (
-                /* 9:16 Smartphone Mockup Skeleton */
-                <div className="relative w-[280px] h-[497px] rounded-[32px] overflow-hidden shadow-2xl border-4 border-studio-700 bg-gradient-to-b from-studio-950 via-studio-900 to-studio-950 flex flex-col justify-between p-5 select-none">
-                  {/* Animated Scanline moving down */}
-                  <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-accent-purple to-transparent opacity-80 animate-scanline pointer-events-none" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-transparent animate-shimmer pointer-events-none" />
+                <div className="relative w-[290px] h-[515px] rounded-[36px] overflow-hidden shadow-2xl border-4 border-white/15 bg-gradient-to-b from-[#121612] via-[#0c0f0c] to-[#121612] flex flex-col justify-between p-6 select-none">
+                  <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#BFF97E] to-transparent opacity-80 animate-scanline pointer-events-none" />
 
-                  {/* Top phone speaker cutout & status pill */}
-                  <div className="relative z-10 flex flex-col items-center space-y-3">
-                    <div className="h-1.5 w-16 rounded-full bg-studio-700/80 mx-auto" />
-                    <div className="flex items-center space-x-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 px-2.5 py-1 text-[10px] text-purple-300 font-semibold shadow-sm">
-                      <Sparkles className="h-3 w-3 text-purple-400 animate-spin" />
-                      <span>Google Flow Veo 3.1</span>
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex items-center space-x-2 rounded-full border border-[#BFF97E]/30 bg-[#BFF97E]/10 px-3 py-1 text-xs text-[#BFF97E] font-bold">
+                      <Sparkles className="h-3.5 w-3.5 text-[#BFF97E]" />
+                      <span>Reels Live Canvas</span>
                     </div>
+                    <span className="text-xs text-slate-400 font-mono">
+                      ~{project.script?.targetDurationSeconds || 15}s
+                    </span>
                   </div>
 
-                  {/* Center Animation & Generation Status */}
-                  <div className="relative z-10 text-center space-y-3 px-2">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-purple/15 border border-accent-purple/30 text-accent-purple shadow-lg shadow-purple-500/20 animate-pulse">
-                      <Film className="h-7 w-7" />
+                  <div className="relative z-10 text-center space-y-3">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#BFF97E]/10 border border-[#BFF97E]/30 text-[#BFF97E]">
+                      {isGenerating ? (
+                        <Loader2 className="h-7 w-7 animate-spin" />
+                      ) : (
+                        <Film className="h-7 w-7" />
+                      )}
                     </div>
-
-                    <div className="space-y-1">
-                      <div className="text-xs font-bold text-white">
-                        {project.status === 'script_generating'
-                          ? 'Drafting Storyboard...'
-                          : isScriptReady
-                          ? 'Script Ready for Review'
-                          : isGenerating
-                          ? `Generating Scenes (${completedScenes}/${totalScenes})...`
-                          : isPaused
-                          ? 'Generation Paused'
-                          : project.status === 'assembling'
-                          ? 'Assembling Final Video...'
-                          : 'AI Production in Progress...'}
-                      </div>
-                      <p className="text-[10px] text-slate-400 leading-tight">
+                    <div>
+                      <h4 className="text-base font-bold text-white">
                         {isGenerating
-                          ? 'Final video will appear here after all scenes complete & merge'
+                          ? `Creating Scenes (${completedScenes}/${totalScenes})...`
                           : isScriptReady
-                          ? 'Click "Start Generating Video" above to render in Google Flow'
-                          : project.currentStageMessage}
+                          ? 'Storyboards Ready'
+                          : 'Awaiting Assembly'}
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-1 max-w-[200px] mx-auto">
+                        Google Flow & Antigravity AI rendering video sequence
                       </p>
                     </div>
-
-                    {/* Scene progress indicator */}
-                    {totalScenes > 0 && (
-                      <div className="flex items-center justify-center space-x-1.5 mt-2">
-                        {scenes.map((s, i) => (
-                          <div
-                            key={i}
-                            className={`h-2 w-2 rounded-full transition-all ${
-                              s.status === 'completed' || s.clipPath916 || s.clipPath169
-                                ? 'bg-emerald-400'
-                                : s.status === 'generating'
-                                ? 'bg-accent-purple animate-ping'
-                                : s.status === 'failed'
-                                ? 'bg-rose-500'
-                                : 'bg-studio-700'
-                            }`}
-                            title={`Scene ${i + 1}: ${s.status || 'pending'}`}
-                          />
-                        ))}
-                      </div>
-                    )}
                   </div>
 
-                  {/* Bottom notice */}
                   <div className="relative z-10 space-y-2 text-center">
-                    <div className="p-2 rounded-lg bg-black/80 border border-white/10 backdrop-blur-md">
-                      <span className="text-[11px] font-bold text-yellow-300 drop-shadow">
+                    <div className="p-2.5 rounded-2xl bg-black/80 border border-white/10 backdrop-blur-md">
+                      <span className="text-xs font-bold text-[#BFF97E]">
                         {allScenesComplete
-                          ? 'All scenes ready — assembling final video...'
-                          : `${completedScenes}/${totalScenes} scenes downloaded`}
+                          ? 'All scenes downloaded — assembling...'
+                          : `${completedScenes}/${totalScenes} scenes completed`}
                       </span>
                     </div>
-                    <span className="text-[9px] text-slate-400 block">
-                      Video player unlocks here once assembled
-                    </span>
                   </div>
                 </div>
               ) : (
-                /* 16:9 Landscape Widescreen Skeleton */
-                <div className="relative w-full max-w-2xl aspect-video rounded-2xl overflow-hidden shadow-2xl border-2 border-studio-700 bg-gradient-to-b from-studio-950 via-studio-900 to-studio-950 flex flex-col justify-between p-6 select-none">
-                  <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-accent-purple to-transparent opacity-80 animate-scanline pointer-events-none" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-transparent animate-shimmer pointer-events-none" />
-
+                <div className="relative w-full max-w-2xl aspect-video rounded-3xl overflow-hidden shadow-2xl border-2 border-white/15 bg-gradient-to-b from-[#121612] via-[#0c0f0c] to-[#121612] flex flex-col justify-between p-6 select-none">
                   <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex items-center space-x-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-xs text-purple-300 font-semibold">
-                      <Sparkles className="h-3.5 w-3.5 text-purple-400 animate-spin" />
-                      <span>16:9 Feed & YouTube Landscape</span>
+                    <div className="flex items-center space-x-2 rounded-full border border-[#BFF97E]/30 bg-[#BFF97E]/10 px-3 py-1 text-xs text-[#BFF97E] font-bold">
+                      <Sparkles className="h-3.5 w-3.5 text-[#BFF97E]" />
+                      <span>16:9 Widescreen Feed</span>
                     </div>
-                    <span className="text-[11px] text-slate-400 font-mono">
-                      Target: {project.script?.targetDurationSeconds || 15}s
+                    <span className="text-xs text-slate-400 font-mono">
+                      ~{project.script?.targetDurationSeconds || 15}s
                     </span>
                   </div>
 
                   <div className="relative z-10 text-center space-y-3 max-w-md mx-auto">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-purple/15 border border-accent-purple/30 text-accent-purple shadow-lg shadow-purple-500/20 animate-pulse">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#BFF97E]/10 border border-[#BFF97E]/30 text-[#BFF97E]">
                       <Film className="h-7 w-7" />
                     </div>
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-bold text-white">
-                        {project.status === 'assembling'
-                          ? 'FFmpeg Assembling Final Video...'
-                          : `Generating Scenes (${completedScenes}/${totalScenes})...`}
-                      </h4>
-                      <p className="text-xs text-slate-400">
-                        Final merged video appears here after all scenes complete
-                      </p>
-                    </div>
-
-                    {/* Scene dots */}
-                    {totalScenes > 0 && (
-                      <div className="flex items-center justify-center space-x-1.5 mt-2">
-                        {scenes.map((s, i) => (
-                          <div
-                            key={i}
-                            className={`h-2 w-2 rounded-full transition-all ${
-                              s.status === 'completed' || s.clipPath916 || s.clipPath169
-                                ? 'bg-emerald-400'
-                                : s.status === 'generating'
-                                ? 'bg-accent-purple animate-ping'
-                                : s.status === 'failed'
-                                ? 'bg-rose-500'
-                                : 'bg-studio-700'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    )}
+                    <h4 className="text-base font-bold text-white">
+                      {isGenerating
+                        ? `Rendering Scenes (${completedScenes}/${totalScenes})...`
+                        : 'Widescreen Assembly Pending'}
+                    </h4>
                   </div>
 
-                  <div className="relative z-10 flex items-center justify-between pt-2 border-t border-studio-800/60">
-                    <div className="p-1.5 px-3 rounded-lg bg-black/80 border border-white/10 text-xs font-bold text-yellow-300">
-                      {allScenesComplete
-                        ? 'All scenes ready — assembling...'
-                        : `${completedScenes}/${totalScenes} scenes downloaded`}
-                    </div>
-                    <span className="text-[11px] text-slate-400">
-                      Player renders upon completion
-                    </span>
+                  <div className="relative z-10 text-center text-xs text-slate-400">
+                    Video player will display output here upon completion
                   </div>
                 </div>
               )}
@@ -1205,215 +773,246 @@ function ProjectTrackerContent() {
         </div>
       </div>
 
-      {/* ========================================================= */}
-      {/* 5. DEDICATED SOCIAL PUBLISHING UI (STRICTLY GATED)        */}
-      {/* Appears ONLY after video is 100% assembled and ready      */}
-      {/* ========================================================= */}
+      {/* Horizontal Scene Timeline Strip Directly Matching Reference Design (Image 1 Bottom) */}
+      {project.script && (
+        <div className="order-1 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-6 space-y-4 shadow-sm dark:shadow-xl backdrop-blur-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                <span>Horizontal Scene Timeline Strip</span>
+              </h3>
+              <span className="rounded-full bg-lime-100 dark:bg-white/10 px-3 py-0.5 text-xs font-bold text-lime-800 dark:text-[#BFF97E] border border-lime-300 dark:border-transparent">
+                {completedScenes}/{totalScenes} Scenes Ready
+              </span>
+            </div>
+            <div className="flex items-center space-x-2 text-xs text-slate-600 dark:text-slate-400">
+              <Volume2 className="h-3.5 w-3.5 text-lime-600 dark:text-[#BFF97E]" />
+              <span>Voiceover + Ken Burns Synced</span>
+            </div>
+          </div>
+
+          {/* Horizontal Scrolling Card Row */}
+          <div className="flex items-stretch space-x-4 overflow-x-auto pb-3 pt-1">
+            {scenes.map((scene, idx) => {
+              const sceneVideo = scene.clipPath916 || scene.clipPath169;
+              const isSceneComplete = scene.status === 'completed' || !!sceneVideo;
+              const isSceneGenerating = scene.status === 'generating' || retryingSceneIdx === scene.sceneIndex;
+              const isSelected = activeScenePreviewIdx === idx;
+
+              return (
+                <div
+                  key={idx}
+                  onClick={() => setActiveScenePreviewIdx(idx)}
+                  className={`group relative flex-shrink-0 w-72 rounded-2xl border p-4 cursor-pointer transition-all ${
+                    isSelected
+                      ? 'border-lime-500 dark:border-[#BFF97E] bg-lime-50/50 dark:bg-[#161c16] ring-1 ring-lime-400 dark:ring-[#BFF97E] shadow-md dark:shadow-xl dark:shadow-[#BFF97E]/10'
+                      : 'border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/30 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-100/70 dark:hover:bg-[#141814]'
+                  }`}
+                >
+                  {/* Thumbnail / Preview Squircle */}
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-950 dark:bg-black/50 border border-slate-200 dark:border-white/10 mb-3">
+                    {sceneVideo ? (
+                      <video
+                        src={getVideoUrl(sceneVideo)}
+                        className="w-full h-full object-cover"
+                        preload="metadata"
+                      />
+                    ) : isSceneGenerating ? (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-black/60 text-[#BFF97E] space-y-1">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span className="text-[10px] font-mono">Generating...</span>
+                      </div>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-400">
+                        <Film className="h-6 w-6" />
+                      </div>
+                    )}
+
+                    <div className="absolute top-2 left-2 rounded-full bg-black/70 backdrop-blur px-2 py-0.5 text-[10px] font-bold text-white">
+                      Scene {idx + 1}
+                    </div>
+
+                    <div className="absolute top-2 right-2 rounded-full bg-black/70 backdrop-blur px-2 py-0.5 text-[10px] font-mono text-[#BFF97E]">
+                      {scene.durationSeconds}s
+                    </div>
+                  </div>
+
+                  {/* Narration & Audio Waveform Badge */}
+                  <div className="space-y-2">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-2 italic leading-relaxed">
+                      &ldquo;{scene.narrationOrSubtitle}&rdquo;
+                    </p>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-white/10 text-[10px]">
+                      <div className="flex items-center space-x-1.5 text-lime-700 dark:text-[#BFF97E] font-mono font-semibold">
+                        <span>♫ ||||||</span>
+                        <span className="text-slate-500 dark:text-slate-400 font-sans">Audio Synced</span>
+                      </div>
+                      <span className={`font-bold ${isSceneComplete ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`}>
+                        {isSceneComplete ? '✓ Ready' : 'In Queue'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Selected Scene Detailed Prompt & Edit Inspector */}
+      {project.script && scenes[activeScenePreviewIdx] && (
+        <div className="order-2 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/85 p-6 space-y-4 shadow-sm dark:shadow-xl">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+              <span>Scene {activeScenePreviewIdx + 1} Prompt Inspector</span>
+            </h4>
+            <button
+              onClick={() => handleRetryScene(scenes[activeScenePreviewIdx].sceneIndex)}
+              disabled={retryingSceneIdx === scenes[activeScenePreviewIdx].sceneIndex}
+              className="pill-btn-lime px-4 py-1 text-xs font-bold text-black flex items-center space-x-1 shadow-sm"
+            >
+              <RotateCcw className="h-3 w-3" />
+              <span>Regenerate Scene {activeScenePreviewIdx + 1}</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                Visual Prompt (Google Flow Veo 3.1)
+              </span>
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 text-xs font-mono text-slate-800 dark:text-slate-200 leading-relaxed break-words whitespace-pre-wrap">
+                {scenes[activeScenePreviewIdx].visualPrompt}
+              </div>
+            </div>
+
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                Voiceover Narration
+              </span>
+              <div className="p-3.5 rounded-2xl bg-lime-50/70 dark:bg-black/40 border border-lime-200 dark:border-white/10 text-xs text-lime-900 dark:text-[#BFF97E] italic leading-relaxed break-words whitespace-pre-wrap">
+                &ldquo;{scenes[activeScenePreviewIdx].narrationOrSubtitle}&rdquo;
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dedicated Social Publishing Section (Gated for completed videos) */}
       {isAssembledOrDone && (
-        <div className="rounded-2xl border border-accent-purple/40 bg-gradient-to-b from-studio-900/95 to-studio-950 p-6 space-y-6 shadow-2xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-studio-800 pb-4">
-            <div className="space-y-1">
-              <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-                <Share2 className="h-5 w-5 text-accent-purple" />
+        <div className="order-4 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-8 space-y-6 shadow-sm dark:shadow-2xl backdrop-blur-2xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-5">
+            <div>
+              <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
+                <Share2 className="h-5 w-5 text-lime-600 dark:text-[#BFF97E]" />
                 <span>Meta Suite Publishing Hub</span>
               </h3>
-              <p className="text-xs text-slate-400">
-                Your video is assembled! Review caption, hashtags, and publish to your connected Meta accounts.
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                Video is assembled! Review caption, hashtags, and publish directly to Meta Suite accounts.
               </p>
             </div>
 
             <button
               onClick={handleCopyCaption}
-              className="inline-flex items-center space-x-1.5 rounded-lg border border-studio-700 bg-studio-850 px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white transition-colors"
+              className="rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-all flex items-center space-x-1.5 shadow-sm"
             >
-              {copiedCaption ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+              {copiedCaption ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
               <span>{copiedCaption ? 'Copied!' : 'Copy Caption & Tags'}</span>
             </button>
           </div>
 
-          {/* Token expiry warning */}
-          {metaStatus?.tokenExpiresInDays !== undefined && metaStatus.tokenExpiresInDays <= 0 && (
-            <div className="flex items-center gap-2 p-3 rounded-xl border border-amber-500/40 bg-amber-500/10 text-xs text-amber-200">
-              <AlertCircle className="h-4 w-4 text-amber-400 shrink-0" />
-              <span>
-                <strong>Token expired!</strong> Go to{' '}
-                <Link href="/setup" className="text-accent-purple hover:underline font-semibold">
-                  Setup
-                </Link>{' '}
-                and paste a new Meta access token to publish.
-              </span>
-            </div>
-          )}
-
-          {/* Account Target Notification */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-studio-700 bg-studio-950/80">
-            <div className="flex items-center space-x-2.5">
-              <div className="flex -space-x-1">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white shadow">
-                  <Facebook className="h-3.5 w-3.5" />
-                </div>
-                {metaStatus?.selectedPage?.instagramBusinessAccount && (
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-pink-500 text-white shadow">
-                    <Instagram className="h-3.5 w-3.5" />
-                  </div>
-                )}
-              </div>
-              <div className="text-xs">
-                <span className="text-slate-400">Publishing to Account: </span>
-                <span className="font-bold text-white">
-                  {metaStatus?.selectedPage?.name || 'Default Connected Page'}
-                </span>
-                {metaStatus?.selectedPage?.instagramBusinessAccount && (
-                  <span className="text-pink-300 font-mono ml-1.5">
-                    (@{metaStatus.selectedPage.instagramBusinessAccount.username})
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <Link
-              href="/setup"
-              className="text-xs text-accent-purple hover:underline font-medium shrink-0 flex items-center space-x-1"
-            >
-              <span>Change Account / Page</span>
-              <ExternalLink className="h-3 w-3" />
-            </Link>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Caption & Hashtags Editor */}
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-300 mb-1.5 flex items-center space-x-1.5">
-                  <Edit3 className="h-3.5 w-3.5 text-accent-purple" />
-                  <span>Post Caption</span>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                  Post Caption
                 </label>
                 <textarea
                   value={editedCaption}
                   onChange={e => setEditedCaption(e.target.value)}
                   rows={4}
-                  className="w-full rounded-xl border border-studio-700 bg-studio-950 p-3 text-xs text-slate-200 focus:border-accent-purple focus:outline-none focus:ring-1 focus:ring-accent-purple leading-relaxed"
+                  className="w-full rounded-2xl border border-slate-300 dark:border-white/10 bg-slate-50/70 dark:bg-black/40 p-4 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-lime-500 dark:focus:border-[#BFF97E]/50 leading-relaxed font-sans"
                   placeholder="Enter caption for Instagram & Facebook..."
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 mb-1.5 block">Hashtags</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                  Hashtags
+                </label>
                 <input
                   type="text"
                   value={editedHashtags}
                   onChange={e => setEditedHashtags(e.target.value)}
-                  className="w-full rounded-xl border border-studio-700 bg-studio-950 px-3 py-2 text-xs text-slate-200 focus:border-accent-purple focus:outline-none focus:ring-1 focus:ring-accent-purple font-mono"
+                  className="w-full rounded-2xl border border-slate-300 dark:border-white/10 bg-slate-50/70 dark:bg-black/40 px-4 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-lime-500 dark:focus:border-[#BFF97E]/50 font-mono"
                   placeholder="#ai #reels #viral #trending"
                 />
               </div>
             </div>
 
-            {/* Platform Selection & Publishing Trigger */}
             <div className="space-y-4 flex flex-col justify-between">
               <div>
-                <label className="text-xs font-semibold text-slate-300 mb-2 block">
-                  Select Publishing Platforms
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-2">
+                  Destinations
                 </label>
-                <div className="space-y-2">
-                  <label className="flex items-center justify-between p-3 rounded-xl border border-studio-800 bg-studio-950/60 cursor-pointer hover:border-studio-700 transition-colors">
-                    <div className="flex items-center space-x-2.5">
-                      <Instagram className="h-4 w-4 text-pink-400" />
-                      <div>
-                        <span className="text-xs font-medium text-slate-200 block">
-                          Instagram Reels (9:16)
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          Resumable Upload to connected IG account
-                        </span>
-                      </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/30 cursor-pointer hover:border-slate-300 dark:hover:border-white/20 shadow-sm">
+                    <div className="flex items-center space-x-2">
+                      <Instagram className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                      <span className="text-xs font-semibold text-slate-900 dark:text-white">Instagram Reels</span>
                     </div>
                     <input
                       type="checkbox"
                       checked={selectedTargets.instagramReels}
-                      onChange={e =>
-                        setSelectedTargets({ ...selectedTargets, instagramReels: e.target.checked })
-                      }
-                      className="rounded border-studio-700 text-accent-purple focus:ring-0"
+                      onChange={e => setSelectedTargets({ ...selectedTargets, instagramReels: e.target.checked })}
+                      className="accent-lime-500 dark:accent-[#BFF97E]"
                     />
                   </label>
 
-                  <label className="flex items-center justify-between p-3 rounded-xl border border-studio-800 bg-studio-950/60 cursor-pointer hover:border-studio-700 transition-colors">
-                    <div className="flex items-center space-x-2.5">
-                      <Facebook className="h-4 w-4 text-blue-400" />
-                      <div>
-                        <span className="text-xs font-medium text-slate-200 block">
-                          Facebook Reels (9:16)
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          Publishes as vertical Reel on Page (Resumable Upload)
-                        </span>
-                      </div>
+                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/30 cursor-pointer hover:border-slate-300 dark:hover:border-white/20 shadow-sm">
+                    <div className="flex items-center space-x-2">
+                      <Facebook className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-xs font-semibold text-slate-900 dark:text-white">Facebook Reels</span>
                     </div>
                     <input
                       type="checkbox"
                       checked={selectedTargets.facebookReels}
-                      onChange={e =>
-                        setSelectedTargets({ ...selectedTargets, facebookReels: e.target.checked })
-                      }
-                      className="rounded border-studio-700 text-accent-purple focus:ring-0"
+                      onChange={e => setSelectedTargets({ ...selectedTargets, facebookReels: e.target.checked })}
+                      className="accent-lime-500 dark:accent-[#BFF97E]"
                     />
                   </label>
 
-                  <label className="flex items-center justify-between p-3 rounded-xl border border-studio-800 bg-studio-950/60 cursor-pointer hover:border-studio-700 transition-colors">
-                    <div className="flex items-center space-x-2.5">
-                      <Facebook className="h-4 w-4 text-blue-500" />
-                      <div>
-                        <span className="text-xs font-medium text-slate-200 block">
-                          Facebook Page Video (16:9 / 9:16)
-                        </span>
-                        <span className="text-[10px] text-slate-400">Standard Page feed video</span>
-                      </div>
+                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/30 cursor-pointer hover:border-slate-300 dark:hover:border-white/20 shadow-sm">
+                    <div className="flex items-center space-x-2">
+                      <Facebook className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-xs font-semibold text-slate-900 dark:text-white">Page Video</span>
                     </div>
                     <input
                       type="checkbox"
                       checked={selectedTargets.facebookPageVideo}
-                      onChange={e =>
-                        setSelectedTargets({ ...selectedTargets, facebookPageVideo: e.target.checked })
-                      }
-                      className="rounded border-studio-700 text-accent-purple focus:ring-0"
+                      onChange={e => setSelectedTargets({ ...selectedTargets, facebookPageVideo: e.target.checked })}
+                      className="accent-lime-500 dark:accent-[#BFF97E]"
                     />
                   </label>
 
-                  <label className="flex items-center justify-between p-3 rounded-xl border border-studio-800 bg-studio-950/60 cursor-pointer hover:border-studio-700 transition-colors">
-                    <div className="flex items-center space-x-2.5">
-                      <Phone className="h-4 w-4 text-emerald-400" />
-                      <div>
-                        <span className="text-xs font-medium text-slate-200 block">
-                          WhatsApp Status (9:16)
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          Broadcast media to WhatsApp audience
-                        </span>
-                      </div>
+                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/30 cursor-pointer hover:border-slate-300 dark:hover:border-white/20 shadow-sm">
+                    <div className="flex items-center space-x-2">
+                      <Phone className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-xs font-semibold text-slate-900 dark:text-white">WhatsApp</span>
                     </div>
                     <input
                       type="checkbox"
                       checked={selectedTargets.whatsappStatus}
-                      onChange={e =>
-                        setSelectedTargets({ ...selectedTargets, whatsappStatus: e.target.checked })
-                      }
-                      className="rounded border-studio-700 text-accent-purple focus:ring-0"
+                      onChange={e => setSelectedTargets({ ...selectedTargets, whatsappStatus: e.target.checked })}
+                      className="accent-lime-500 dark:accent-[#BFF97E]"
                     />
                   </label>
                 </div>
               </div>
 
               {publishFeedback && (
-                <div
-                  className={`p-2.5 rounded-lg border text-[11px] ${
-                    publishFeedback.includes('⚠️') || publishFeedback.includes('error')
-                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-200'
-                      : publishFeedback.includes('success')
-                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                      : 'bg-studio-800/60 border-studio-700/80 text-slate-300'
-                  }`}
-                >
+                <div className="p-3 rounded-2xl border text-xs bg-lime-50 dark:bg-[#BFF97E]/10 border-lime-300 dark:border-[#BFF97E]/30 text-lime-900 dark:text-white">
                   {publishFeedback}
                 </div>
               )}
@@ -1421,11 +1020,11 @@ function ProjectTrackerContent() {
               <button
                 onClick={handleManualPublish}
                 disabled={isPublishing}
-                className="w-full flex items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-accent-purple to-pink-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-purple-500/25 hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50"
+                className="w-full pill-btn-lime py-4 text-sm font-bold text-black flex items-center justify-center space-x-2 shadow-xl hover:opacity-95"
               >
                 {isPublishing ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin text-black" />
                     <span>Publishing to Meta Suite...</span>
                   </>
                 ) : (
@@ -1437,46 +1036,6 @@ function ProjectTrackerContent() {
               </button>
             </div>
           </div>
-
-          {/* Published Links Section */}
-          {project.publishResults && project.publishResults.length > 0 && (
-            <div className="pt-4 border-t border-studio-800 space-y-2">
-              <span className="text-xs font-semibold text-slate-300 block">
-                Published Links:
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {project.publishResults.map((res, i) => (
-                  <div
-                    key={i}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border text-xs ${
-                      res.status === 'success'
-                        ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
-                        : 'border-rose-500/30 bg-rose-500/10 text-rose-200'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-2 truncate">
-                      {res.platform === 'facebook' && <Facebook className="h-3.5 w-3.5 text-blue-400 shrink-0" />}
-                      {res.platform === 'instagram' && <Instagram className="h-3.5 w-3.5 text-pink-400 shrink-0" />}
-                      <span className="font-semibold capitalize">{res.platform}:</span>
-                      <span className="truncate">{res.status === 'success' ? 'Published' : res.error || 'Failed'}</span>
-                    </div>
-
-                    {res.url && res.status === 'success' && (
-                      <a
-                        href={res.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center space-x-1 text-accent-purple hover:underline ml-2 shrink-0"
-                      >
-                        <span>View</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -1488,7 +1047,7 @@ export default function ProjectTrackerPage() {
     <Suspense
       fallback={
         <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-accent-purple" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-lime-500 dark:border-[#BFF97E] border-t-transparent" />
         </div>
       }
     >

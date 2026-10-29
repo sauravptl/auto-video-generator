@@ -40,6 +40,37 @@ let flowPoller: FlowPoller | null = null;
 
 const isDev = !app.isPackaged;
 
+/**
+ * Electron GUI processes do not inherit the user's interactive shell PATH on macOS.
+ * Resolve the common Node/local binary locations once so flow-auto, agy, and ffmpeg
+ * work identically in development and in the packaged application.
+ */
+function initEnvironmentPaths() {
+  const home = process.env.HOME || '';
+  const nvmRoot = path.join(home, '.nvm', 'versions', 'node');
+  const nvmBins = fs.existsSync(nvmRoot)
+    ? fs
+        .readdirSync(nvmRoot, { withFileTypes: true })
+        .filter(entry => entry.isDirectory())
+        .map(entry => path.join(nvmRoot, entry.name, 'bin'))
+    : [];
+  const extraPaths = [
+    ...nvmBins,
+    path.join(home, '.local', 'bin'),
+    '/opt/homebrew/bin',
+    '/usr/local/bin',
+    '/usr/bin',
+    '/bin',
+    '/usr/sbin',
+    '/sbin',
+  ];
+  process.env.PATH = Array.from(new Set([...extraPaths, ...(process.env.PATH || '').split(path.delimiter)]))
+    .filter(Boolean)
+    .join(path.delimiter);
+}
+
+initEnvironmentPaths();
+
 function createWindow() {
   const iconPath = path.join(__dirname, '../renderer/icon.png');
   let appIcon: Electron.NativeImage | undefined;

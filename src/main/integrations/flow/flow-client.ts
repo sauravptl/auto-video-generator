@@ -6,6 +6,33 @@ import type { FlowStatus, FlowJobRequest, FlowJobResult } from '../../../shared/
 const execAsync = promisify(exec);
 
 export class FlowClient {
+  private static getExecEnv(): NodeJS.ProcessEnv {
+    const home = process.env.HOME || '';
+    const nvmRoot = `${home}/.nvm/versions/node`;
+    const nvmBins = fs.existsSync(nvmRoot)
+      ? fs
+          .readdirSync(nvmRoot, { withFileTypes: true })
+          .filter(entry => entry.isDirectory())
+          .map(entry => `${nvmRoot}/${entry.name}/bin`)
+      : [];
+    const extraPaths = [
+      ...nvmBins,
+      `${home}/.local/bin`,
+      '/opt/homebrew/bin',
+      '/usr/local/bin',
+      '/usr/bin',
+      '/bin',
+      '/usr/sbin',
+      '/sbin',
+    ];
+    return {
+      ...process.env,
+      PATH: Array.from(new Set([...extraPaths, ...(process.env.PATH || '').split(':')]))
+        .filter(Boolean)
+        .join(':'),
+    };
+  }
+
   /**
    * Check flow-auto installation and live connection to Google Flow in Chrome
    */
@@ -24,13 +51,21 @@ export class FlowClient {
 
     try {
       // 1. Check version
-      const { stdout: versionOut } = await execAsync('flow-auto --version');
+      const { stdout: versionOut } = await execAsync('flow-auto --version', { env: this.getExecEnv() });
       defaultStatus.isInstalled = true;
       defaultStatus.version = versionOut.trim();
 
       // 2. Check status with site flow
-      const { stdout: statusOut } = await execAsync('flow-auto status --site flow');
-      const text = statusOut.toLowerCase();
+      const { stdout: statusOut, stderr: statusErr } = await execAsync('flow-auto status --site flow', {
+        env: this.getExecEnv(),
+      });
+      const combinedStatus = `${statusOut}\n${statusErr}`;
+      const text = combinedStatus.toLowerCase();
+      const warning = combinedStatus
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .find(line => /warning|multiple|ambiguous|browser sessions/i.test(line));
+      if (warning) defaultStatus.warning = warning;
 
       // Parse status output
       if (text.includes('extension (flow): connected') || text.includes('connected')) {
@@ -74,8 +109,8 @@ export class FlowClient {
    */
   public static async runDoctor(): Promise<{ output: string }> {
     try {
-      const { stdout } = await execAsync('flow-auto doctor');
-      return { output: stdout };
+      const { stdout, stderr } = await execAsync('flow-auto doctor', { env: this.getExecEnv() });
+      return { output: `${stdout}${stderr ? `\n${stderr}` : ''}` };
     } catch (err: any) {
       return { output: err.stdout || err.message };
     }
@@ -117,11 +152,12 @@ export class FlowClient {
       }
 
       console.log(`Executing Flow Command: ${cmd}`);
-      const { stdout } = await execAsync(cmd);
+      const { stdout, stderr } = await execAsync(cmd, { env: this.getExecEnv() });
 
       // Attempt to parse job ID or result path
-      const matchJob = stdout.match(/job(?:\s+id)?[:\s]+([a-zA-Z0-9_-]+)/i);
-      const matchPath = stdout.match(/(?:\/|[A-Za-z]:\\)[^\s"']+\.(?:mp4|mov|png|jpg)/i);
+      const output = `${stdout}\n${stderr}`;
+      const matchJob = output.match(/job(?:\s+id)?[:\s]+([a-zA-Z0-9_-]+)/i);
+      const matchPath = output.match(/(?:\/|[A-Za-z]:\\)[^\s"']+\.(?:mp4|mov|png|jpg)/i);
 
       const jobId = matchJob ? matchJob[1] : `job_${Date.now()}`;
       const filePath = matchPath ? matchPath[0] : undefined;
@@ -184,7 +220,9 @@ export class FlowClient {
 
       // 2. Poll flow-auto generate get <id> --json
       try {
-        const { stdout } = await execAsync(`flow-auto generate get ${jobId} --json`);
+        const { stdout } = await execAsync(`flow-auto generate get ${jobId} --json`, {
+          env: this.getExecEnv(),
+        });
         const data = JSON.parse(stdout);
         const stage = data.stage || data.status || 'generating';
         onPoll?.(stage);

@@ -3,39 +3,46 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --studio-950: #f8fafc;
+  --background: #f7faf6;
+  --foreground: #090e09;
+  --studio-950: #f7faf6;
   --studio-900: #ffffff;
-  --studio-850: #f1f5f9;
-  --studio-800: #e2e8f0;
+  --studio-850: #f0f4ef;
+  --studio-800: #e2e8e0;
   --studio-700: #cbd5e1;
-  --studio-600: #94a3b8;
-  --studio-500: #64748b;
-  --card-glass: rgba(255, 255, 255, 0.88);
-  --panel-glass: rgba(255, 255, 255, 0.94);
+  --studio-600: #64748b;
+  --studio-500: #475569;
+  --card-glass: rgba(255, 255, 255, 0.95);
+  --panel-glass: rgba(255, 255, 255, 0.98);
   --border-glass: rgba(0, 0, 0, 0.08);
+  --lime-accent: #1e690a;
+  --lime-badge-bg: #ecfccb;
+  --lime-badge-border: #bef264;
 }
 
 .dark {
-  --background: #090a0f;
+  --background: #0c0f0c;
   --foreground: #f8fafc;
-  --studio-950: #090a0f;
-  --studio-900: #10121a;
-  --studio-850: #151824;
-  --studio-800: #1a1f2e;
-  --studio-700: #262e42;
-  --studio-600: #384461;
-  --studio-500: #4f5f87;
-  --card-glass: rgba(21, 24, 36, 0.6);
-  --panel-glass: rgba(16, 18, 26, 0.75);
+  --studio-950: #0c0f0c;
+  --studio-900: #121612;
+  --studio-850: #171d17;
+  --studio-800: #1e261e;
+  --studio-700: #293529;
+  --studio-600: #3c4c3c;
+  --studio-500: #546a54;
+  --card-glass: rgba(18, 24, 18, 0.82);
+  --panel-glass: rgba(14, 18, 14, 0.92);
   --border-glass: rgba(255, 255, 255, 0.08);
+  --lime-accent: #BFF97E;
+  --lime-badge-bg: rgba(191, 249, 126, 0.12);
+  --lime-badge-border: rgba(191, 249, 126, 0.35);
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing: -0.015em;
   overflow-x: hidden;
   user-select: none;
 }
@@ -47,35 +54,126 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--studio-900);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--studio-700);
-  border-radius: 4px;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--studio-600);
 }
 
-/* Glassmorphism helpers */
+/* Glassmorphism helpers matching SF Pro & Galaxon aesthetic */
 .glass-panel {
   background: var(--panel-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border-glass);
 }
 
 .glass-card {
   background: var(--card-glass);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-glass);
-  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .glass-card {
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.7);
 }
 
 .glass-card:hover {
-  border-color: rgba(139, 92, 246, 0.35);
+  border-color: rgba(191, 249, 126, 0.45);
+  box-shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.08), 0 0 16px rgba(191, 249, 126, 0.15);
+}
+
+.dark .glass-card:hover {
+  border-color: rgba(191, 249, 126, 0.35);
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(191, 249, 126, 0.12);
+}
+
+/* Lime / Mint Pill Button styles from Reference Palette */
+.pill-btn-lime {
+  background: linear-gradient(135deg, #BFF97E 0%, #98F899 100%);
+  color: #000000 !important;
+  font-weight: 700;
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(135, 222, 63, 0.35), 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(130, 210, 60, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .pill-btn-lime {
+  box-shadow: 0 8px 24px -4px rgba(191, 249, 126, 0.35);
+  border: 1px solid rgba(191, 249, 126, 0.3);
+}
+
+.pill-btn-lime:hover {
+  opacity: 0.96;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -2px rgba(135, 222, 63, 0.45);
+}
+
+.pill-btn-lime:active {
+  transform: scale(0.97);
+}
+
+/* Glass pill chip */
+.glass-pill {
+  border-radius: 9999px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+/* Floating Prompt Command Bar styling from Image 1 */
+.floating-prompt-bar {
+  background: #ffffff;
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(191, 249, 126, 0.25);
+}
+
+.dark .floating-prompt-bar {
+  background: rgba(18, 23, 18, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Studio Design System Semantic Utility Classes */
+.studio-card {
+  border-radius: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #ffffff;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  transition: all 0.25s ease;
+}
+
+.dark .studio-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(18, 22, 18, 0.92);
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.studio-hero {
+  border-radius: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, #ffffff 0%, #f7faf5 45%, #eef6ec 100%);
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.06);
+}
+
+.dark .studio-hero {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(18, 22, 18, 0.95) 0%, rgba(14, 18, 14, 0.95) 50%, rgba(12, 15, 12, 0.98) 100%);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
 }
 
 /* Light mode specific element text and border contrasts */
@@ -84,7 +182,7 @@ html:not(.dark) {
 }
 
 html:not(.dark) body {
-  background-color: #f8fafc;
+  background-color: #f7faf6;
   color: #0f172a;
 }
 
@@ -94,6 +192,38 @@ html:not(.dark) h3,
 html:not(.dark) h4,
 html:not(.dark) h5,
 html:not(.dark) h6 {
+  color: #0f172a;
+}
+
+/* Fallback protection: If an element still has dark background classes in light mode,
+   gracefully adapt the surface to light so black-on-black text can never happen */
+html:not(.dark) .bg-\[\#121612\]\/90,
+html:not(.dark) .bg-\[\#121612\]\/95,
+html:not(.dark) .bg-\[\#121612\]\/85,
+html:not(.dark) .bg-\[\#121612\]\/80,
+html:not(.dark) .bg-\[\#121612\]\/70,
+html:not(.dark) .bg-\[\#121612\]\/60,
+html:not(.dark) .bg-\[\#121612\],
+html:not(.dark) .bg-\[\#161c16\],
+html:not(.dark) .bg-\[\#0c0f0c\] {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.09) !important;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.05);
+}
+
+html:not(.dark) .bg-black\/40,
+html:not(.dark) .bg-black\/30,
+html:not(.dark) .bg-black\/20 {
+  background-color: rgba(241, 245, 249, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html:not(.dark) .bg-black\/80 {
+  background-color: rgba(230, 235, 240, 0.95) !important;
+}
+
+/* Ensure text contrast in light mode */
+html:not(.dark) .text-white {
   color: #0f172a;
 }
 
@@ -113,38 +243,49 @@ html:not(.dark) .text-slate-400 {
   color: #64748b;
 }
 
-/* Headings and plain text elements with text-white become dark in light mode, preserving buttons & badges */
-html:not(.dark) h1.text-white,
-html:not(.dark) h2.text-white,
-html:not(.dark) h3.text-white,
-html:not(.dark) h4.text-white,
-html:not(.dark) p.text-white,
-html:not(.dark) span.text-white:not(button *):not([class*="bg-"] *):not([class*="from-"] *) {
-  color: #0f172a;
+/* Prevent text overrides inside buttons with solid or gradient backgrounds */
+html:not(.dark) .pill-btn-lime,
+html:not(.dark) .pill-btn-lime * {
+  color: #000000 !important;
 }
 
-html:not(.dark) input,
+html:not(.dark) button.bg-emerald-500,
+html:not(.dark) button.bg-blue-500,
+html:not(.dark) button.bg-rose-500,
+html:not(.dark) .bg-emerald-600 *,
+html:not(.dark) .bg-rose-600 * {
+  color: #ffffff !important;
+}
+
+/* Lime text on light backgrounds: make it crisp dark forest green so it never washes out */
+html:not(.dark) span.text-\[\#BFF97E\]:not(.pill-btn-lime *):not([class*="bg-black"] *),
+html:not(.dark) p.text-\[\#BFF97E\]:not(.pill-btn-lime *),
+html:not(.dark) div.text-\[\#BFF97E\]:not(.pill-btn-lime *),
+html:not(.dark) a.text-\[\#BFF97E\]:not(.pill-btn-lime *) {
+  color: #1b6605 !important;
+}
+
+/* Lime badges on light backgrounds */
+html:not(.dark) .bg-\[\#BFF97E\]\/10,
+html:not(.dark) .bg-\[\#BFF97E\]\/15,
+html:not(.dark) .bg-\[\#BFF97E\]\/20 {
+  background-color: #ecfccb !important;
+  color: #1b6605 !important;
+  border-color: #bef264 !important;
+}
+
+/* Form input styling for light mode */
+html:not(.dark) input:not([type="checkbox"]):not([type="radio"]),
 html:not(.dark) textarea,
 html:not(.dark) select {
-  background-color: #ffffff;
-  color: #0f172a;
-  border-color: #cbd5e1;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
 }
 
 html:not(.dark) input::placeholder,
 html:not(.dark) textarea::placeholder {
-  color: #94a3b8;
-}
-
-html:not(.dark) .glass-card {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-}
-
-html:not(.dark) .glass-panel {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: rgba(0, 0, 0, 0.08);
+  color: #94a3b8 !important;
 }
 
 /* Draggable titlebar area for macOS Electron */
