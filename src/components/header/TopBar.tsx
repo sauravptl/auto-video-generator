@@ -142,14 +142,16 @@ export function TopBar() {
     <header className="titlebar-drag sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-studio-700/60 bg-studio-950/90 px-6 backdrop-blur-md">
       {/* Brand & Left Navigation */}
       <div className="titlebar-no-drag flex items-center space-x-6">
-        <div className="flex items-center space-x-2 pl-14">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-accent-purple to-accent-pink shadow-lg shadow-purple-500/20">
-            <Sparkles className="h-4 w-4 text-white" />
-          </div>
-          <span className="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text font-bold tracking-tight text-transparent">
+        <Link href="/" className="flex items-center space-x-2.5 pl-14 group transition-opacity hover:opacity-90">
+          <img
+            src="/icon.png"
+            alt="CineFlow AI Logo"
+            className="h-8 w-8 rounded-xl shadow-md shadow-purple-500/20 object-contain ring-1 ring-black/10 dark:ring-white/15 transition-transform group-hover:scale-105"
+          />
+          <span className="bg-gradient-to-r from-slate-900 via-slate-700 to-accent-purple dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text font-bold tracking-tight text-transparent text-sm">
             CineFlow AI
           </span>
-        </div>
+        </Link>
 
         <nav className="flex items-center space-x-1">
           {navItems.map(item => {
@@ -161,8 +163,8 @@ export function TopBar() {
                 href={item.href}
                 className={`flex items-center space-x-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                   isActive
-                    ? 'bg-studio-800 text-white shadow-sm'
-                    : 'text-slate-400 hover:bg-studio-850 hover:text-slate-200'
+                    ? 'bg-studio-800 text-slate-900 dark:text-white shadow-sm font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-studio-850 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-accent-purple' : ''}`} />
@@ -328,7 +330,7 @@ export function TopBar() {
         <button
           onClick={() => window.dispatchEvent(new CustomEvent('open-agy-tutorial'))}
           title="Open AGY CLI Setup & Verification Tutorial"
-          className="flex items-center space-x-1.5 rounded-lg border border-studio-700/80 bg-studio-900/80 px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:text-white hover:border-studio-600 transition-all active:scale-95"
+          className="flex items-center space-x-1.5 rounded-lg border border-studio-700/80 bg-studio-900/80 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-studio-600 transition-all active:scale-95"
         >
           <Sparkles className="h-3.5 w-3.5 text-accent-pink" />
           <span className="hidden xl:inline">AGY Guide</span>
@@ -338,7 +340,7 @@ export function TopBar() {
         <button
           onClick={toggleTheme}
           title={`Switch to ${resolvedTheme === 'dark' ? 'Light' : 'Dark'} Mode`}
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-studio-700/80 bg-studio-900/80 text-slate-300 hover:text-white hover:border-studio-600 transition-all active:scale-95"
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-studio-700/80 bg-studio-900/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-studio-600 transition-all active:scale-95"
         >
           {resolvedTheme === 'dark' ? (
             <Sun className="h-4 w-4 text-amber-400" />

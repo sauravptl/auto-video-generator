@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 
 type Theme = 'dark' | 'light' | 'system';
 type ResolvedTheme = 'dark' | 'light';
@@ -22,10 +22,10 @@ const ThemeContext = createContext<ThemeContextType>({
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('dark');
-  const [mounted, setMounted] = useState(false);
+  const isSyncingRef = useRef(false);
 
-  // Apply theme to DOM and Electron
-  const applyTheme = (targetTheme: Theme) => {
+  // Apply theme to DOM and optionally sync to Electron
+  const applyTheme = (targetTheme: Theme, syncElectron: boolean = true) => {
     let active: ResolvedTheme = 'dark';
 
     if (targetTheme === 'system') {
@@ -46,36 +46,45 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.classList.remove('dark');
     }
 
-    // Sync with Electron native chrome & titlebar
-    if (typeof window !== 'undefined' && window.electronAPI?.theme?.set) {
-      window.electronAPI.theme.set(targetTheme).catch(console.error);
+    // Only sync with Electron native chrome when explicitly requested
+    if (syncElectron && typeof window !== 'undefined' && window.electronAPI?.theme?.set) {
+      isSyncingRef.current = true;
+      window.electronAPI.theme.set(targetTheme)
+        .catch(console.error)
+        .finally(() => {
+          setTimeout(() => {
+            isSyncingRef.current = false;
+          }, 150);
+        });
     }
   };
 
   useEffect(() => {
-    setMounted(true);
-
     // Read stored theme from localStorage or default to dark
     const stored = (localStorage.getItem('cineflow_theme') as Theme) || 'dark';
     setThemeState(stored);
-    applyTheme(stored);
+    applyTheme(stored, true);
 
     // Listen to system changes if in system mode
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleSystemChange = () => {
-      if (theme === 'system') {
-        applyTheme('system');
-      }
+      setThemeState(current => {
+        if (current === 'system') {
+          applyTheme('system', false);
+        }
+        return current;
+      });
     };
     mediaQuery.addEventListener('change', handleSystemChange);
 
-    // Listen to Electron IPC theme changes
+    // Listen to Electron IPC theme changes from native OS
     let unsubscribe: (() => void) | undefined;
     if (typeof window !== 'undefined' && window.electronAPI?.theme?.onChange) {
       unsubscribe = window.electronAPI.theme.onChange(({ theme: incomingTheme }) => {
+        if (isSyncingRef.current) return;
         if (incomingTheme === 'dark' || incomingTheme === 'light' || incomingTheme === 'system') {
           setThemeState(incomingTheme);
-          applyTheme(incomingTheme);
+          applyTheme(incomingTheme, false); // DO NOT echo back to Electron
         }
       });
     }
@@ -89,7 +98,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     localStorage.setItem('cineflow_theme', newTheme);
-    applyTheme(newTheme);
+    applyTheme(newTheme, true);
   };
 
   const toggleTheme = () => {

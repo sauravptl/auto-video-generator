@@ -106,9 +106,11 @@ export function AgyOnboardingModal() {
         <div className="relative p-6 border-b border-studio-800 bg-gradient-to-r from-accent-purple/10 via-studio-900 to-indigo-950/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-accent-purple to-accent-pink shadow-lg shadow-purple-500/25">
-                <Sparkles className="h-5 w-5 text-white" />
-              </div>
+              <img
+                src="/icon.png"
+                alt="CineFlow AI Logo"
+                className="h-10 w-10 rounded-2xl shadow-lg shadow-purple-500/25 object-contain ring-1 ring-white/10"
+              />
               <div>
                 <h2 className="text-xl font-bold tracking-tight text-white flex items-center space-x-2">
                   <span>Antigravity AI (AGY) Setup Guide</span>

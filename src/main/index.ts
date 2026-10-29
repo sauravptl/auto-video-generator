@@ -1,5 +1,6 @@
-import { app, BrowserWindow, ipcMain, shell, dialog, protocol, net, nativeTheme } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, dialog, protocol, net, nativeTheme, nativeImage } from 'electron';
 import path from 'path';
+import fs from 'fs';
 import { pathToFileURL } from 'url';
 import { IPC_CHANNELS } from '../shared/ipc-channels';
 import { ProjectManager } from './core/project-manager';
@@ -11,8 +12,17 @@ import { FFmpegEngine } from './integrations/ffmpeg/ffmpeg-engine';
 import { MetaClient } from './integrations/meta/meta-client';
 import { PipelineOrchestrator } from './core/pipeline-orchestrator';
 
-// Register privileged custom scheme for streaming local media to the UI
+// Register privileged custom schemes
 protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'app',
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+    },
+  },
   {
     scheme: 'media',
     privileges: {
@@ -28,12 +38,25 @@ protocol.registerSchemesAsPrivileged([
 let mainWindow: BrowserWindow | null = null;
 let flowPoller: FlowPoller | null = null;
 
-const isDev = process.env.NODE_ENV !== 'production' || !app.isPackaged;
+const isDev = !app.isPackaged;
 
 function createWindow() {
+  const iconPath = path.join(__dirname, '../renderer/icon.png');
+  let appIcon: Electron.NativeImage | undefined;
+  if (fs.existsSync(iconPath)) {
+    try {
+      appIcon = nativeImage.createFromPath(iconPath);
+      if (process.platform === 'darwin' && app.dock) {
+        app.dock.setIcon(appIcon);
+      }
+    } catch (e) {
+      console.error('Failed to set native app icon:', e);
+    }
+  }
+
   mainWindow = new BrowserWindow({
     title: 'CineFlow AI',
-    icon: path.join(__dirname, '../../build/icon.png'),
+    ...(appIcon ? { icon: appIcon } : {}),
     width: 1280,
     height: 860,
     minWidth: 1024,
@@ -52,7 +75,7 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:3000');
     // mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../../dist/renderer/index.html'));
+    mainWindow.loadURL('app://cineflow/index.html');
   }
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -77,6 +100,26 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // Protocol handler for serving static Next.js production build offline
+  protocol.handle('app', (request) => {
+    try {
+      const url = new URL(request.url);
+      let pathname = decodeURIComponent(url.pathname);
+      if (pathname === '/' || !pathname) {
+        pathname = '/index.html';
+      }
+      const rendererDir = path.join(__dirname, '../renderer');
+      let filePath = path.join(rendererDir, pathname.replace(/^\//, ''));
+      if (!fs.existsSync(filePath) && fs.existsSync(`${filePath}.html`)) {
+        filePath = `${filePath}.html`;
+      }
+      return net.fetch(pathToFileURL(filePath).toString());
+    } catch (err: any) {
+      console.error('Failed to handle app protocol request:', err);
+      return new Response('Not found', { status: 404 });
+    }
+  });
+
   // Protocol handler for streaming local video and image files with HTTP 206 range support
   protocol.handle('media', (request) => {
     try {
@@ -153,12 +196,20 @@ function registerIpcHandlers() {
     const isDark = nativeTheme.shouldUseDarkColors;
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.setBackgroundColor(isDark ? '#090a0f' : '#f8fafc');
+    }
+    return { success: true, theme, shouldUseDarkColors: isDark };
+  });
+
+  // Listen to OS theme changes when user chooses system mode
+  nativeTheme.on('updated', () => {
+    if (nativeTheme.themeSource === 'system' && mainWindow && !mainWindow.isDestroyed()) {
+      const isDark = nativeTheme.shouldUseDarkColors;
+      mainWindow.setBackgroundColor(isDark ? '#090a0f' : '#f8fafc');
       mainWindow.webContents.send(IPC_CHANNELS.THEME_CHANGED, {
-        theme,
+        theme: 'system',
         shouldUseDarkColors: isDark,
       });
     }
-    return { success: true, theme, shouldUseDarkColors: isDark };
   });
 
   // Flow Connector
