@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { spawn } from 'child_process';
 import type { VideoScript, VideoFormat, SceneDefinition } from '../../../shared/types';
 
@@ -9,7 +10,15 @@ export interface GenerateScriptOptions {
 export class AgyClient {
   private static getSpawnEnv() {
     const home = process.env.HOME || '';
+    const nvmRoot = `${home}/.nvm/versions/node`;
+    const nvmBins = fs.existsSync(nvmRoot)
+      ? fs
+          .readdirSync(nvmRoot, { withFileTypes: true })
+          .filter(entry => entry.isDirectory())
+          .map(entry => `${nvmRoot}/${entry.name}/bin`)
+      : [];
     const extraPaths = [
+      ...nvmBins,
       `${home}/.local/bin`,
       '/opt/homebrew/bin',
       '/usr/local/bin',

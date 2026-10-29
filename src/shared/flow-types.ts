@@ -10,6 +10,8 @@ export interface FlowStatus {
   dailyVideosUsed?: number;
   dailyImageLimit?: number;
   dailyImagesUsed?: number;
+  /** Non-fatal diagnostic warning from flow-auto (for example, multiple browser sessions). */
+  warning?: string;
   lastChecked: string;
 }
 

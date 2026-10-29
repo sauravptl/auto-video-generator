@@ -106,6 +106,10 @@ export function TopBar() {
       setIsSnapping(true);
       try {
         await window.electronAPI.snapSideBySide();
+        // Chrome may need a moment to expose the Flow tab after the window move.
+        await new Promise(resolve => setTimeout(resolve, 600));
+        const refreshed = await window.electronAPI.flow.getStatus();
+        setFlowStatus(refreshed);
       } finally {
         setIsSnapping(false);
       }
@@ -304,7 +308,7 @@ export function TopBar() {
         {/* Flow Connector & Chrome Tab Status */}
         <div className="flex items-center space-x-2 rounded-full border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-black/30 px-3 py-1.5 text-xs">
           <span className="text-slate-500 dark:text-slate-400 font-medium">Flow:</span>
-          {flowStatus?.flowTabStatus === 'visible' ? (
+          {flowStatus?.flowTabStatus === 'visible' || flowStatus?.extensionConnected ? (
             <span className="flex items-center text-lime-700 dark:text-[#BFF97E] font-semibold">
               <span className="mr-1.5 h-2 w-2 rounded-full bg-lime-500 dark:bg-[#BFF97E] animate-pulse" />
               Chrome Ready
@@ -354,7 +358,7 @@ export function TopBar() {
         <button
           onClick={handleSnapSideBySide}
           disabled={isSnapping}
-          title="Snap this app to the left 50% and Google Chrome with Google Flow to the right 50%"
+          title={flowStatus?.warning || 'Snap this app to the left 50% and Google Chrome with Google Flow to the right 50%'}
           className="flex items-center space-x-1.5 rounded-full pill-btn-lime px-4 py-1.5 text-xs font-bold text-black shadow-md transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
         >
           <Columns2 className="h-3.5 w-3.5 text-black" />

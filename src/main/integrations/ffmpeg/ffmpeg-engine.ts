@@ -43,7 +43,22 @@ export class FFmpegEngine {
       return { success: false, error: 'No scenes defined in script' };
     }
 
-    onProgress?.(10, 'Preparing scene assets and generating subtitles...');
+    const needs916 = project.format === '9:16' || project.format === 'both';
+    const needs169 = project.format === '16:9' || project.format === 'both';
+    const isValidClip = (filePath?: string): filePath is string =>
+      !!filePath && fs.existsSync(filePath) && fs.statSync(filePath).size > 50000;
+    const missingClips = scenes.flatMap((scene, index) => [
+      ...(needs916 && !isValidClip(scene.clipPath916) ? [`Scene ${index + 1} (9:16)`] : []),
+      ...(needs169 && !isValidClip(scene.clipPath169) ? [`Scene ${index + 1} (16:9)`] : []),
+    ]);
+    if (missingClips.length > 0) {
+      return {
+        success: false,
+        error: `Cannot assemble until Google Flow downloads valid clips: ${missingClips.join(', ')}.`,
+      };
+    }
+
+    onProgress?.(10, 'Preparing verified scene assets and generating subtitles...');
 
     try {
       let output916: string | undefined;
@@ -171,14 +186,15 @@ export class FFmpegEngine {
         fs.mkdirSync(tmpDir, { recursive: true });
       }
 
-      // Collect valid scene clips or generate placeholder video if clips not yet downloaded
+      // Assembly only accepts real Google Flow downloads. Placeholder clips are
+      // intentionally not used in the production pipeline.
       const rawClipPaths: string[] = [];
 
       for (let i = 0; i < scenes.length; i++) {
         const s = scenes[i];
-        let p = width === 1080 ? s.clipPath916 : s.clipPath169;
-        if (!p || !fs.existsSync(p)) {
-          p = await this.createPlaceholderClip(s, width, height, i);
+        const p = width === 1080 ? s.clipPath916 : s.clipPath169;
+        if (!p || !fs.existsSync(p) || fs.statSync(p).size <= 50000) {
+          throw new Error(`Scene ${i + 1} is missing a valid downloaded video clip.`);
         }
         rawClipPaths.push(p);
       }

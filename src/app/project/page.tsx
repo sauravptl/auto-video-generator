@@ -388,7 +388,7 @@ function ProjectTrackerContent() {
   };
 
   return (
-    <div className="space-y-8 pb-24 max-w-7xl mx-auto">
+    <div className="flex flex-col space-y-8 pb-24 max-w-7xl mx-auto">
       {/* Top Header with Back, Title, and Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3.5">
@@ -618,7 +618,7 @@ function ProjectTrackerContent() {
       </div>
 
       {/* Main Video Cinema Player Frame */}
-      <div className="rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-6 sm:p-8 space-y-6 shadow-sm dark:shadow-2xl backdrop-blur-2xl">
+      <div className="order-3 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-6 sm:p-8 space-y-6 shadow-sm dark:shadow-2xl backdrop-blur-2xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
@@ -775,7 +775,7 @@ function ProjectTrackerContent() {
 
       {/* Horizontal Scene Timeline Strip Directly Matching Reference Design (Image 1 Bottom) */}
       {project.script && (
-        <div className="rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-6 space-y-4 shadow-sm dark:shadow-xl backdrop-blur-2xl">
+        <div className="order-1 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-6 space-y-4 shadow-sm dark:shadow-xl backdrop-blur-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
@@ -862,7 +862,7 @@ function ProjectTrackerContent() {
 
       {/* Selected Scene Detailed Prompt & Edit Inspector */}
       {project.script && scenes[activeScenePreviewIdx] && (
-        <div className="rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/85 p-6 space-y-4 shadow-sm dark:shadow-xl">
+        <div className="order-2 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/85 p-6 space-y-4 shadow-sm dark:shadow-xl">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
             <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
               <span>Scene {activeScenePreviewIdx + 1} Prompt Inspector</span>
@@ -901,7 +901,7 @@ function ProjectTrackerContent() {
 
       {/* Dedicated Social Publishing Section (Gated for completed videos) */}
       {isAssembledOrDone && (
-        <div className="rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-8 space-y-6 shadow-sm dark:shadow-2xl backdrop-blur-2xl">
+        <div className="order-4 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-8 space-y-6 shadow-sm dark:shadow-2xl backdrop-blur-2xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-5">
             <div>
               <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">

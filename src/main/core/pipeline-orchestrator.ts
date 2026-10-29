@@ -88,18 +88,42 @@ export class PipelineOrchestrator {
     this.activeRuns.set(projectId, true);
 
     try {
+      const projectDir = ProjectManager.getProjectAssetsDir(projectId);
+      const scenesDir = path.join(projectDir, 'scenes');
+      const scenes = project.script.scenes;
+      const needs916 = project.format === '9:16' || project.format === 'both';
+      const needs169 = project.format === '16:9' || project.format === 'both';
+      const isValidClip = (filePath?: string): filePath is string =>
+        !!filePath && fs.existsSync(filePath) && fs.statSync(filePath).size > 50000;
+      const hasRequiredClip = (scene: SceneDefinition) =>
+        (!needs916 || isValidClip(scene.clipPath916)) && (!needs169 || isValidClip(scene.clipPath169));
+
+      const missingBeforeStart = scenes.filter(scene => !hasRequiredClip(scene));
+      if (missingBeforeStart.length > 0) {
+        const flowStatus = await FlowClient.getStatus();
+        const flowConnected = flowStatus.bridgeStatus === 'up' &&
+          (flowStatus.extensionConnected || flowStatus.flowTabVisible);
+        if (!flowConnected) {
+          project.status = 'scenes_generating';
+          project.progressPercent = 25;
+          project.currentStageMessage = flowStatus.warning
+            ? `Google Flow is not ready: ${flowStatus.warning}`
+            : 'Google Flow is not connected. Open Chrome with the Flow Connector extension and keep the Flow tab visible, then retry.';
+          ProjectManager.updateProject(project);
+          onProgress(project);
+          return;
+        }
+      }
+
       project.status = 'scenes_generating';
       project.currentStageMessage = 'Generating scenes with Google Flow (Veo 3.1)...';
       ProjectManager.updateProject(project);
       onProgress(project);
 
-      const projectDir = ProjectManager.getProjectAssetsDir(projectId);
-      const scenesDir = path.join(projectDir, 'scenes');
       if (!fs.existsSync(scenesDir)) {
         fs.mkdirSync(scenesDir, { recursive: true });
       }
 
-      const scenes = project.script.scenes;
       const totalScenes = scenes.length;
 
       // Helper to check existing file in downloads
@@ -188,7 +212,7 @@ export class PipelineOrchestrator {
               console.warn(`[Pipeline] Scene ${i + 1} Flow submission error: ${res916.error}`);
               scene.status = 'failed';
               scene.error = res916.error || 'Google Flow rejected prompt or hit policy filter';
-            } else if (res916.filePath && fs.existsSync(res916.filePath)) {
+            } else if (res916.filePath && isValidClip(res916.filePath)) {
               sourceClip = res916.filePath;
             } else if (res916.id) {
               project.currentStageMessage = `Scene ${i + 1}/${totalScenes}: Waiting for Google Flow generation in Chrome...`;
@@ -206,16 +230,20 @@ export class PipelineOrchestrator {
             }
           }
 
-          if (sourceClip && fs.existsSync(sourceClip)) {
+          if (sourceClip && isValidClip(sourceClip)) {
             try {
               fs.copyFileSync(sourceClip, destClip916);
-              scene.clipPath916 = destClip916;
-              scene.status = 'completed';
-              scene.error = undefined;
-              console.log(`[Pipeline] Saved scene ${i + 1} (9:16) to ${destClip916}`);
-            } catch (e) {
-              scene.clipPath916 = sourceClip;
-              scene.status = 'completed';
+              if (isValidClip(destClip916)) {
+                scene.clipPath916 = destClip916;
+                scene.error = undefined;
+                console.log(`[Pipeline] Saved scene ${i + 1} (9:16) to ${destClip916}`);
+              } else {
+                scene.status = 'failed';
+                scene.error = 'Google Flow returned an invalid or incomplete 9:16 video file.';
+              }
+            } catch (e: any) {
+              scene.status = 'failed';
+              scene.error = `Could not save 9:16 video: ${e.message}`;
             }
           } else if (!scene.clipPath916 && scene.status !== 'failed') {
             scene.status = 'failed';
@@ -247,7 +275,7 @@ export class PipelineOrchestrator {
             if (res169.status === 'failed' || res169.id.startsWith('err_')) {
               scene.status = 'failed';
               scene.error = res169.error || 'Google Flow rejected 16:9 prompt';
-            } else if (res169.filePath && fs.existsSync(res169.filePath)) {
+            } else if (res169.filePath && isValidClip(res169.filePath)) {
               sourceClip = res169.filePath;
             } else if (res169.id) {
               sourceClip = await FlowClient.waitForJob(
@@ -262,20 +290,27 @@ export class PipelineOrchestrator {
             }
           }
 
-          if (sourceClip && fs.existsSync(sourceClip)) {
+          if (sourceClip && isValidClip(sourceClip)) {
             try {
               fs.copyFileSync(sourceClip, destClip169);
-              scene.clipPath169 = destClip169;
-              scene.status = 'completed';
-              scene.error = undefined;
-            } catch (e) {
-              scene.clipPath169 = sourceClip;
-              scene.status = 'completed';
+              if (isValidClip(destClip169)) {
+                scene.clipPath169 = destClip169;
+                scene.error = undefined;
+              } else {
+                scene.status = 'failed';
+                scene.error = 'Google Flow returned an invalid or incomplete 16:9 video file.';
+              }
+            } catch (e: any) {
+              scene.status = 'failed';
+              scene.error = `Could not save 16:9 video: ${e.message}`;
             }
+          } else if (!scene.clipPath169 && scene.status !== 'failed') {
+            scene.status = 'failed';
+            scene.error = 'Video download timed out or was rejected by Google Flow.';
           }
         }
 
-        if (scene.status !== 'failed') {
+        if (scene.status !== 'failed' && hasRequiredClip(scene)) {
           scene.status = 'completed';
           project.currentStageMessage = `Scene ${i + 1}/${totalScenes} ready.`;
         } else {
@@ -289,9 +324,20 @@ export class PipelineOrchestrator {
       // Check for pause
       if (!this.activeRuns.get(projectId)) return;
 
+      const incompleteScenes = scenes.filter(scene => !hasRequiredClip(scene));
+      if (incompleteScenes.length > 0) {
+        const labels = incompleteScenes.map(scene => `Scene ${scene.sceneIndex + 1}`).join(', ');
+        project.status = 'scenes_generating';
+        project.progressPercent = 55;
+        project.currentStageMessage = `Generation paused: ${labels} still need valid downloaded video clips. Retry those scenes before assembly.`;
+        ProjectManager.updateProject(project);
+        onProgress(project);
+        return;
+      }
+
       project.status = 'scenes_ready';
       project.progressPercent = 60;
-      project.currentStageMessage = 'All scenes generated. Starting video assembly...';
+      project.currentStageMessage = 'All scenes downloaded and verified. Starting video assembly...';
       ProjectManager.updateProject(project);
       onProgress(project);
 
@@ -405,58 +451,67 @@ export class PipelineOrchestrator {
     onProgress?.(project);
 
     try {
-      const res = await FlowClient.generateScene({
-        prompt: scene.visualPrompt,
-        type: scene.model === 'nano-banana-pro' ? 'image' : 'video',
-        aspectRatio: project.format === '16:9' ? '16:9' : '9:16',
-        durationSeconds: scene.durationSeconds,
-        model: scene.model,
-        folder: projectId,
-        index: sceneIndex,
-        inputImage: scene.referenceImage,
-      });
+      const formats: Array<'9:16' | '16:9'> =
+        project.format === 'both' ? ['9:16', '16:9'] : [project.format];
+      const validClip = (filePath?: string): filePath is string =>
+        !!filePath && fs.existsSync(filePath) && fs.statSync(filePath).size > 50000;
 
-      if (res.status === 'failed' || res.id.startsWith('err_')) {
-        scene.status = 'failed';
-        scene.error = res.error || 'Google Flow rejected prompt';
-        project.currentStageMessage = `Scene ${sceneIndex} failed: ${scene.error}`;
-        ProjectManager.updateProject(project);
-        onProgress?.(project);
-        return { success: false, error: scene.error };
-      }
+      for (const aspectRatio of formats) {
+        const res = await FlowClient.generateScene({
+          prompt: scene.visualPrompt,
+          type: scene.model === 'nano-banana-pro' ? 'image' : 'video',
+          aspectRatio,
+          durationSeconds: scene.durationSeconds,
+          model: scene.model,
+          folder: projectId,
+          index: sceneIndex,
+          inputImage: scene.referenceImage,
+        });
 
-      let sourceClip = res.filePath;
-      if (!sourceClip && res.id) {
-        sourceClip = await FlowClient.waitForJob(
-          res.id,
-          stage => {
-            project.currentStageMessage = `Scene ${sceneIndex}: Google Flow is ${stage}...`;
-            onProgress?.(project);
-          },
-          4,
-          { folder: projectId, index: sceneIndex }
-        );
-      }
+        if (res.status === 'failed' || res.id.startsWith('err_')) {
+          throw new Error(res.error || `Google Flow rejected ${aspectRatio} prompt`);
+        }
 
-      if (sourceClip && fs.existsSync(sourceClip)) {
-        const dest = project.format === '16:9' ? destClip169 : destClip916;
+        let sourceClip = res.filePath;
+        if (!sourceClip && res.id) {
+          sourceClip = await FlowClient.waitForJob(
+            res.id,
+            stage => {
+              project.currentStageMessage = `Scene ${sceneIndex} (${aspectRatio}): Google Flow is ${stage}...`;
+              onProgress?.(project);
+            },
+            4,
+            { folder: projectId, index: sceneIndex }
+          );
+        }
+
+        if (!validClip(sourceClip)) {
+          throw new Error(`Google Flow did not download a valid ${aspectRatio} video.`);
+        }
+
+        const dest = aspectRatio === '16:9' ? destClip169 : destClip916;
         fs.copyFileSync(sourceClip, dest);
-        if (project.format === '16:9') scene.clipPath169 = dest;
+        if (!validClip(dest)) {
+          throw new Error(`The downloaded ${aspectRatio} video could not be saved completely.`);
+        }
+        if (aspectRatio === '16:9') scene.clipPath169 = dest;
         else scene.clipPath916 = dest;
-        scene.status = 'completed';
-        scene.error = undefined;
-        project.currentStageMessage = `Scene ${sceneIndex} regenerated successfully!`;
-        ProjectManager.updateProject(project);
-        onProgress?.(project);
-        return { success: true };
-      } else {
-        scene.status = 'failed';
-        scene.error = 'Google Flow generation timed out or rejected.';
-        project.currentStageMessage = `Scene ${sceneIndex} failed: ${scene.error}`;
-        ProjectManager.updateProject(project);
-        onProgress?.(project);
-        return { success: false, error: scene.error };
       }
+
+      scene.status = 'completed';
+      scene.error = undefined;
+      const needs916 = project.format === '9:16' || project.format === 'both';
+      const needs169 = project.format === '16:9' || project.format === 'both';
+      const allScenesComplete = project.script.scenes.every(item =>
+        (!needs916 || validClip(item.clipPath916)) && (!needs169 || validClip(item.clipPath169))
+      );
+      project.status = allScenesComplete ? 'scenes_ready' : 'scenes_generating';
+      project.currentStageMessage = allScenesComplete
+        ? `Scene ${sceneIndex} regenerated successfully. All required clips are ready for assembly.`
+        : `Scene ${sceneIndex} regenerated successfully. Other scenes still need valid downloaded clips.`;
+      ProjectManager.updateProject(project);
+      onProgress?.(project);
+      return { success: true };
     } catch (err: any) {
       scene.status = 'failed';
       scene.error = err.message;
