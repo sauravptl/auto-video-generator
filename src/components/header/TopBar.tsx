@@ -33,6 +33,8 @@ export function TopBar() {
   const [isSnapping, setIsSnapping] = useState(false);
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
   const [isSwitchingPage, setIsSwitchingPage] = useState(false);
+  const [isCheckingFlow, setIsCheckingFlow] = useState(false);
+  const [flowCheckMessage, setFlowCheckMessage] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { resolvedTheme, toggleTheme } = useTheme();
@@ -113,6 +115,27 @@ export function TopBar() {
       } finally {
         setIsSnapping(false);
       }
+    }
+  };
+
+  const handleCheckFlow = async () => {
+    if (!window.electronAPI || isCheckingFlow) return;
+    setIsCheckingFlow(true);
+    setFlowCheckMessage(null);
+    try {
+      const doctor = await window.electronAPI.flow.triggerDoctor();
+      const refreshed = await window.electronAPI.flow.getStatus();
+      setFlowStatus(refreshed);
+      setFlowCheckMessage(
+        refreshed.warning ||
+          (refreshed.extensionConnected || refreshed.flowTabVisible
+            ? 'Flow Connector is ready.'
+            : doctor.output ? 'Flow check finished. Open Google Flow in Chrome and keep its tab visible.' : 'Flow Connector is not ready.')
+      );
+    } catch {
+      setFlowCheckMessage('Flow check failed. Confirm flow-auto is installed, then try again.');
+    } finally {
+      setIsCheckingFlow(false);
     }
   };
 
@@ -306,8 +329,16 @@ export function TopBar() {
         )}
 
         {/* Flow Connector & Chrome Tab Status */}
-        <div className="flex items-center space-x-2 rounded-full border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-black/30 px-3 py-1.5 text-xs">
-          <span className="text-slate-500 dark:text-slate-400 font-medium">Flow:</span>
+        <div className="relative">
+        <button
+          type="button"
+          onClick={handleCheckFlow}
+          disabled={isCheckingFlow}
+          aria-label="Check Flow Connector status"
+          title={flowStatus?.warning || 'Check Flow Connector, Chrome extension, and Google Flow tab'}
+          className="flex min-h-11 items-center space-x-2 rounded-full border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-black/30 px-3 py-1.5 text-xs transition-colors hover:border-lime-400 dark:hover:border-[#BFF97E]/40 disabled:opacity-60"
+        >
+          <span className="text-slate-500 dark:text-slate-400 font-medium">{isCheckingFlow ? 'Checking…' : 'Flow:'}</span>
           {flowStatus?.flowTabStatus === 'visible' || flowStatus?.extensionConnected ? (
             <span className="flex items-center text-lime-700 dark:text-[#BFF97E] font-semibold">
               <span className="mr-1.5 h-2 w-2 rounded-full bg-lime-500 dark:bg-[#BFF97E] animate-pulse" />
@@ -329,6 +360,12 @@ export function TopBar() {
               Offline
             </span>
           )}
+        </button>
+        {flowCheckMessage && (
+          <div role="status" className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121612] p-3 text-[11px] font-medium text-slate-700 dark:text-slate-200 shadow-xl">
+            {flowCheckMessage}
+          </div>
+        )}
         </div>
 
         {/* AGY Tutorial Guide Button */}

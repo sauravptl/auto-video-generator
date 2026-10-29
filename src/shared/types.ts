@@ -62,6 +62,7 @@ export interface Project {
   title: string;
   topic: string;
   format: VideoFormat;
+  scriptProviderId?: string;
   script?: VideoScript;
   referenceImages?: string[];
   publishTargets: PublishTargets;

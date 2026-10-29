@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { ProjectManager } from './project-manager';
-import { AgyClient } from '../integrations/agy/agy-client';
+import { ScriptProviderService } from './script-provider-service';
+import { SettingsService } from './settings-service';
 import { FlowClient } from '../integrations/flow/flow-client';
 import { FFmpegEngine } from '../integrations/ffmpeg/ffmpeg-engine';
 import { MetaClient } from '../integrations/meta/meta-client';
@@ -28,16 +29,22 @@ export class PipelineOrchestrator {
       if (!project.script) {
         project.status = 'script_generating';
         project.progressPercent = 10;
-        project.currentStageMessage = 'Generating video script with AGY CLI AI...';
+        const providerId = project.scriptProviderId || SettingsService.getDefaultProviderId();
+        if (!providerId) throw new Error('No script provider is configured. Add one in Settings.');
+        const provider = SettingsService.getProvider(providerId);
+        if (!provider) throw new Error('Selected script provider is no longer configured. Choose another provider in Settings.');
+        project.scriptProviderId = providerId;
+        project.currentStageMessage = `Generating video script with ${provider.name}...`;
         ProjectManager.updateProject(project);
         onProgress(project);
 
-        console.log(`[Pipeline ${projectId}] Generating script with AGY CLI for: ${project.topic.slice(0, 60)}...`);
-        const script = await AgyClient.generateScript(
-          project.topic,
-          project.format,
-          project.referenceImages
-        );
+        console.log(`[Pipeline ${projectId}] Generating script with ${provider.name}`);
+        const script = await ScriptProviderService.generate({
+          providerId,
+          topic: project.topic,
+          format: project.format,
+          referenceImages: project.referenceImages,
+        });
         project.script = script;
         project.title = script.title;
 

@@ -107,7 +107,7 @@ export default function MetaSetupPage() {
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Meta Suite Connection</h1>
         <p className="text-sm text-slate-600 dark:text-slate-300">
-          Connect your accounts to enable automated 1-click publishing for Instagram Reels, Facebook Reels & Videos, and WhatsApp media messages.
+          Connect your accounts to publish Instagram Reels and Facebook Reels or Page videos. WhatsApp remains unavailable until its phone and recipient configuration is validated.
         </p>
       </div>
 
@@ -198,11 +198,11 @@ export default function MetaSetupPage() {
               {status.whatsappPhone ? (
                 <div>
                   <p className="text-sm font-semibold text-slate-900 dark:text-white">{status.whatsappPhone.displayPhoneNumber}</p>
-                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">{status.whatsappPhone.verifiedName}</p>
+                  <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5 font-medium">Cloud number detected — publishing is not enabled yet</p>
                 </div>
               ) : (
                 <div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Configure phone ID in Settings</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Unavailable — add a validated phone number ID in Settings</p>
                 </div>
               )}
             </div>

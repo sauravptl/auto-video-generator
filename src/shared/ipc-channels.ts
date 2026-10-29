@@ -18,6 +18,12 @@ export const IPC_CHANNELS = {
   AGY_GENERATE_SCRIPT: 'agy:generate-script',
   AGY_TEST_CONNECTION: 'agy:test-connection',
 
+  // Settings & Script Providers
+  SETTINGS_GET: 'settings:get',
+  SETTINGS_SAVE: 'settings:save',
+  SCRIPT_PROVIDERS_LIST: 'script-providers:list',
+  SCRIPT_PROVIDER_TEST: 'script-providers:test',
+
   // Video Assembly
   VIDEO_ASSEMBLE: 'video:assemble',
   VIDEO_ASSEMBLY_PROGRESS: 'video:assembly-progress',

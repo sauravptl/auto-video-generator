@@ -28,6 +28,8 @@ import {
   Check,
 } from 'lucide-react';
 import type { VideoFormat, PublishTargets } from '@/shared/types';
+import type { ScriptProviderSummary } from '@/shared/script-agent-types';
+import Link from 'next/link';
 
 interface UploadedImage {
   id: string;
@@ -60,6 +62,8 @@ function NewProjectContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [agyToast, setAgyToast] = useState<{ show: boolean; message: string } | null>(null);
+  const [providers, setProviders] = useState<ScriptProviderSummary[]>([]);
+  const [providerId, setProviderId] = useState('');
 
   // Read topic passed from Dashboard quick command bar
   useEffect(() => {
@@ -70,12 +74,14 @@ function NewProjectContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedAutoPublish = localStorage.getItem('autoPublish');
-      if (savedAutoPublish !== null) {
-        setAutoPublish(savedAutoPublish === 'true');
-      }
-    }
+    if (!window.electronAPI) return;
+    Promise.all([window.electronAPI.settings.get(), window.electronAPI.scriptProviders.list()])
+      .then(([settings, availableProviders]) => {
+        setAutoPublish(settings.autoPublish);
+        setProviders(availableProviders);
+        setProviderId(settings.defaultScriptProviderId || availableProviders[0]?.id || '');
+      })
+      .catch(error => console.error('Failed to load generation settings:', error));
   }, []);
 
   const sampleIdeas = [
@@ -224,13 +230,8 @@ Narration: Follow us for daily breakthrough insights shaping the future!`;
     setIsSubmitting(true);
     try {
       if (typeof window !== 'undefined' && window.electronAPI) {
-        // Pre-generation check: verify AGY CLI availability
-        const agyCheck = await window.electronAPI.agy.testConnection();
-        if (!agyCheck.success) {
-          setAgyToast({
-            show: true,
-            message: agyCheck.error || 'Antigravity AI (AGY) CLI is not installed or not found in system PATH. Install it to generate AI video storyboards.',
-          });
+        if (!providerId) {
+          setAgyToast({ show: true, message: 'Configure and enable a script provider in Settings before creating a video.' });
           setIsSubmitting(false);
           return;
         }
@@ -250,7 +251,8 @@ Narration: Follow us for daily breakthrough insights shaping the future!`;
           format,
           publishTargets,
           imagePayload,
-          autoPublish
+          autoPublish,
+          providerId
         );
 
         // 2. Launch the pipeline orchestrator
@@ -522,6 +524,24 @@ Narration: Follow us for daily breakthrough insights shaping the future!`;
           </div>
         </div>
 
+        {/* Script Provider */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <label htmlFor="script-provider" className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Script agent</label>
+            {providers.length === 0 && <Link href="/settings" className="text-xs font-semibold text-lime-700 dark:text-[#BFF97E] hover:underline">Configure one in Settings</Link>}
+          </div>
+          <select
+            id="script-provider"
+            value={providerId}
+            onChange={event => setProviderId(event.target.value)}
+            disabled={providers.length === 0}
+            className="w-full rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#121612]/80 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:border-lime-500 focus:outline-none focus:ring-2 focus:ring-lime-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {providers.length === 0 ? <option>No configured script agents</option> : providers.map(provider => <option key={provider.id} value={provider.id}>{provider.name}</option>)}
+          </select>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">This agent writes the storyboard. Google Flow remains the separate scene-generation engine.</p>
+        </div>
+
         {/* Reference Images / Assets Section */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -757,7 +777,7 @@ Narration: Follow us for daily breakthrough insights shaping the future!`;
         {/* Submit Primary Pill Action Matching Reference Design */}
         <button
           type="submit"
-          disabled={isSubmitting || !topic.trim()}
+          disabled={isSubmitting || !topic.trim() || !providerId}
           className="w-full inline-flex items-center justify-center space-x-2.5 pill-btn-lime px-8 py-4 text-base font-bold text-black shadow-xl hover:opacity-95 active:scale-98 transition-all disabled:opacity-50 cursor-pointer"
         >
           <Sparkles className="h-5 w-5 text-black fill-black" />
@@ -766,13 +786,13 @@ Narration: Follow us for daily breakthrough insights shaping the future!`;
         </button>
       </form>
 
-      {/* AGY Missing Error Toast */}
+      {/* Script generation error toast */}
       {agyToast?.show && (
         <div className="fixed bottom-6 right-6 z-50 max-w-md rounded-3xl border border-rose-300 dark:border-rose-500/40 bg-white/95 dark:bg-[#121612]/95 p-5 shadow-2xl backdrop-blur-2xl animate-in slide-in-from-bottom-5 duration-200 text-slate-900 dark:text-white">
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-2 text-rose-600 dark:text-rose-400 font-bold text-xs uppercase tracking-wider">
               <AlertTriangle className="h-4 w-4" />
-              <span>Antigravity AI Engine Required</span>
+              <span>Script agent setup required</span>
             </div>
             <button
               onClick={() => setAgyToast(null)}
@@ -786,13 +806,10 @@ Narration: Follow us for daily breakthrough insights shaping the future!`;
           </p>
           <div className="mt-4 flex items-center space-x-2">
             <button
-              onClick={() => {
-                setAgyToast(null);
-                window.dispatchEvent(new CustomEvent('open-agy-tutorial'));
-              }}
+              onClick={() => setAgyToast(null)}
               className="pill-btn-lime px-4 py-1.5 text-xs font-bold text-black flex items-center space-x-1"
             >
-              <span>Open Setup Guide</span>
+              <Link href="/settings">Open Settings</Link>
               <ArrowRight className="h-3 w-3" />
             </button>
           </div>

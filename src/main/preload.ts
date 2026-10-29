@@ -3,6 +3,7 @@ import { IPC_CHANNELS } from '../shared/ipc-channels';
 import type { Project, VideoScript, VideoFormat, PublishTargets } from '../shared/types';
 import type { FlowStatus, FlowJobRequest, FlowJobResult } from '../shared/flow-types';
 import type { MetaConnectionStatus } from '../shared/meta-types';
+import type { SettingsSnapshot, SettingsUpdate, ScriptProviderHealth, ScriptProviderSummary } from '../shared/script-agent-types';
 
 export const electronAPI = {
   // System & Window
@@ -55,6 +56,16 @@ export const electronAPI = {
       ipcRenderer.invoke(IPC_CHANNELS.AGY_TEST_CONNECTION),
   },
 
+  // Settings and Script Providers
+  settings: {
+    get: (): Promise<SettingsSnapshot> => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_GET),
+    save: (update: SettingsUpdate): Promise<SettingsSnapshot> => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_SAVE, update),
+  },
+  scriptProviders: {
+    list: (): Promise<ScriptProviderSummary[]> => ipcRenderer.invoke(IPC_CHANNELS.SCRIPT_PROVIDERS_LIST),
+    test: (providerId: string): Promise<ScriptProviderHealth> => ipcRenderer.invoke(IPC_CHANNELS.SCRIPT_PROVIDER_TEST, providerId),
+  },
+
   // Video Assembly
   video: {
     assemble: (projectId: string): Promise<{ success: boolean; output916?: string; output169?: string; error?: string }> =>
@@ -94,7 +105,8 @@ export const electronAPI = {
       format: VideoFormat,
       publishTargets: PublishTargets,
       referenceImages?: string[],
-      autoPublish?: boolean
+      autoPublish?: boolean,
+      scriptProviderId?: string
     ): Promise<Project> =>
       ipcRenderer.invoke(IPC_CHANNELS.PROJECT_CREATE, {
         topic,
@@ -102,6 +114,7 @@ export const electronAPI = {
         publishTargets,
         referenceImages,
         autoPublish,
+        scriptProviderId,
       }),
     getAll: (): Promise<Project[]> =>
       ipcRenderer.invoke(IPC_CHANNELS.PROJECT_GET_ALL),
