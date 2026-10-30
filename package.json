@@ -1,7 +1,7 @@
 {
   "name": "cineflow-ai",
   "productName": "CineFlow AI",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CineFlow AI - Cinematic AI Video Production Studio powered by Electron, Next.js, AGY CLI, Google Flow, and Meta Suite",
   "main": "dist/main/index.js",
   "scripts": {

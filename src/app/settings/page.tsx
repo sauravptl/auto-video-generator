@@ -18,6 +18,7 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
   const [agyStatus, setAgyStatus] = useState<{ checked: boolean; success: boolean; version?: string } | null>(null);
+  const [providerTest, setProviderTest] = useState<{ loading: boolean; success?: boolean; message?: string }>({ loading: false });
 
   useEffect(() => {
     if (!window.electronAPI) return;
@@ -32,34 +33,51 @@ export default function SettingsPage() {
     setProviders(current => current.map(provider => provider.id === id ? { ...provider, ...update } : provider));
   };
 
+  const persistSettings = async () => {
+    const openai = providers.find(provider => provider.id === 'openai');
+    const snapshot = await window.electronAPI.settings.save({
+      metaAppId: settings?.metaAppId || '',
+      metaAppSecret,
+      metaRedirectUri: settings?.metaRedirectUri,
+      ffmpegPath: settings?.ffmpegPath,
+      flowModel: settings?.flowModel,
+      defaultFormat: settings?.defaultFormat,
+      autoPublish: settings?.autoPublish,
+      whatsappPhoneNumberId: settings?.whatsappPhoneNumberId,
+      scriptProviders: providers,
+      defaultScriptProviderId: settings?.defaultScriptProviderId || providers.find(provider => provider.enabled)?.id,
+      providerApiKeys: apiKey ? { openai: apiKey } : undefined,
+    });
+    setSettings(snapshot);
+    setMetaAppSecret('');
+    setApiKey('');
+    return { snapshot, openai };
+  };
+
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
     try {
-      const openai = providers.find(provider => provider.id === 'openai');
-      const snapshot = await window.electronAPI.settings.save({
-        metaAppId: settings?.metaAppId || '',
-        metaAppSecret,
-        metaRedirectUri: settings?.metaRedirectUri,
-        ffmpegPath: settings?.ffmpegPath,
-        flowModel: settings?.flowModel,
-        defaultFormat: settings?.defaultFormat,
-        autoPublish: settings?.autoPublish,
-        whatsappPhoneNumberId: settings?.whatsappPhoneNumberId,
-        scriptProviders: providers,
-        defaultScriptProviderId: settings?.defaultScriptProviderId || providers.find(provider => provider.enabled)?.id,
-        providerApiKeys: apiKey ? { openai: apiKey } : undefined,
-      });
-      setSettings(snapshot);
-      setMetaAppSecret('');
-      setApiKey('');
+      const { snapshot, openai } = await persistSettings();
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-      if (openai?.enabled && (!openai.baseUrl || !openai.model || (!snapshot.scriptProviders.find(provider => provider.id === 'openai')?.hasApiKey))) {
+      if (openai?.enabled && (!openai.baseUrl || !openai.model || !snapshot.scriptProviders.find(provider => provider.id === 'openai')?.hasApiKey)) {
         setError('OpenAI-compatible is enabled but needs a valid URL, model, and API key before it can be selected.');
       }
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Settings could not be saved.');
+    }
+  };
+
+  const testOpenaiProvider = async () => {
+    setError('');
+    setProviderTest({ loading: true });
+    try {
+      await persistSettings();
+      const result = await window.electronAPI.scriptProviders.test('openai');
+      setProviderTest({ loading: false, success: result.success, message: result.success ? 'Connection successful.' : result.error || 'Connection failed.' });
+    } catch (reason) {
+      setProviderTest({ loading: false, success: false, message: reason instanceof Error ? reason.message : 'Connection test failed.' });
     }
   };
 
@@ -87,6 +105,11 @@ export default function SettingsPage() {
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Model<input value={provider.model || ''} onChange={event => updateProvider(provider.id, { model: event.target.value })} className="mt-1 w-full rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-black/30 px-3 py-2 text-sm" placeholder="gpt-4o-mini" /></label>
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 sm:col-span-2">Base URL<input value={provider.baseUrl || ''} onChange={event => updateProvider(provider.id, { baseUrl: event.target.value })} className="mt-1 w-full rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-black/30 px-3 py-2 text-sm" placeholder="https://api.openai.com/v1" /></label>
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 sm:col-span-2">API key (write only)<input type="password" value={apiKey} onChange={event => setApiKey(event.target.value)} autoComplete="new-password" className="mt-1 w-full rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-black/30 px-3 py-2 text-sm" placeholder={settings.scriptProviders.find(item => item.id === provider.id)?.hasApiKey ? 'Saved securely — leave blank to keep' : 'Enter API key'} /></label>
+              <div className="sm:col-span-2 flex flex-wrap items-center gap-3">
+                <button type="button" onClick={testOpenaiProvider} disabled={providerTest.loading} className="rounded-full border border-slate-300 dark:border-white/15 px-4 py-2 text-xs font-semibold disabled:opacity-50">{providerTest.loading ? 'Testing…' : 'Test connection'}</button>
+                <span className="text-xs text-slate-500 dark:text-slate-400">Save and securely check this OpenAI-compatible endpoint.</span>
+                {providerTest.message && <p role={providerTest.success ? 'status' : 'alert'} className={`w-full text-xs font-semibold ${providerTest.success ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>{providerTest.message}</p>}
+              </div>
             </div>}
           </div>)}
           <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Default script agent<select value={settings.defaultScriptProviderId || providers.find(provider => provider.enabled)?.id || ''} onChange={event => setSettings({ ...settings, defaultScriptProviderId: event.target.value })} className="mt-1 w-full rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-black/30 px-3 py-2 text-sm">{providers.filter(provider => provider.enabled).map(provider => <option key={provider.id} value={provider.id}>{provider.name}</option>)}</select></label>
