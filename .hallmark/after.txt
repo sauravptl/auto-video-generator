@@ -1,0 +1,74 @@
+render tier: 25 screenshots in /Volumes/GENIUSEXT/My Project/Auto-video-Generator/.hallmark/shots (1280x800, 1440x900, 1920x1080 folds; 1440 and 375 full pages)
+http://localhost:3000/
+  FAIL 40 :1 [1280px] contrast 1.38:1 at best over the gradient behind p.mt-1.text-sm "Generate high-converting" | fix: Raise the contrast to threshold, or give the text its own ground
+  FAIL 40 :1 [1280px] contrast 1.38:1 at best over the gradient behind button.rounded-full.border "Cyberpunk Tokyo rain sto"
+  FAIL 40 :1 [1440px] a field's edge is under 3:1 against what surrounds it: input.w-full 1.20:1 | fix: Draw the field in --color-muted, or fill it a step off the surface it sits on
+  WARN 40 :1 [1280px] contrast drops to 1.03:1 over the gradient behind span "Generate Video" | fix: Check the text where the gradient is darkest or lightest; give the label its own ground
+  WARN F19 :1 [1440px] 5 font weights in running use (400, 500, 600, 700, 800) | fix: Three weights at most, display and body together, picked as extremes
+http://localhost:3000/new
+  FAIL 40 :1 [1280px] contrast 1.38:1 against the pixels behind < 4.5:1 on span "Snap Side-by-Side" | fix: Raise the contrast to threshold
+  FAIL 40 :1 [1280px] contrast 1.38:1 against the pixels behind < 4.5:1 on p.text-sm.text-slate-600 "Configure prompt, camera"
+  FAIL 40 :1 [1280px] contrast 1.38:1 against the pixels behind < 4.5:1 on label.text-xs.font-bold "Creation Mode"
+  FAIL 40 :1 [1280px] contrast 1.38:1 against the pixels behind < 4.5:1 on button.rounded-full.border "3 Mindblowing Science Fa"
+  FAIL 40 :1 [1280px] contrast 1.33:1 against the pixels behind < 4.5:1 on div.text-xs.font-bold "Top to bottom"
+  FAIL 41 :1 [1280px] button text ~ button fill on span (1.38:1) | fix: Use accent-ink or paper for the label
+  FAIL 41 :1 [1280px] button text ~ button fill on button.rounded-full.border (1.38:1)
+  FAIL 41 :1 [1280px] button text ~ button fill on div.text-xs.font-bold (1.33:1)
+  REFLEX 39b :1 [1440px] control height outside 32 to 52px: button.inline-flex 26px, button.flex 70px, button.flex 70px | fix: Marketing controls stand 44 to 52px; app UI 32 to 40px with a 44px hit target
+  REFLEX 75 :1 [1440px] text that strains the eye: span.rounded-full at 10px, p.text-[11px] at 11px, span.rounded-full at 10px, p.text… | fix: Running text 12px or more (16px for body), functional text 11px or more, multi-line prose leaded 1.3 or more
+  WARN F19 :1 [1440px] 5 font weights in running use (400, 500, 600, 700, 800)
+http://localhost:3000/settings
+  FAIL 40 :1 [1280px] contrast 1.38:1 against the pixels behind < 4.5:1 on div.max-w-3xl.mx-auto "Loading settings…"
+http://localhost:3000/setup
+  FAIL 40 :1 [1280px] contrast 1.38:1 against the pixels behind < 4.5:1 on p.text-sm.text-slate-600 "Connect your accounts to"
+  FAIL 40 :1 [1280px] contrast 1.33:1 against the pixels behind < 4.5:1 on h4.text-xs.font-bold "Required Permissions / S"
+  WARN F19 :1 [1440px] 5 font weights in running use (400, 500, 600, 700, 800)
+src/app/project/page.tsx
+  REFLEX 28b :664 video without poster | fix: Add a poster frame; guard: below the fold and not the LCP
+  REFLEX 28b :675 video without poster
+  REFLEX 28b :810 video without poster
+  WARN 49 :504 long clickable label "Starting Google Flow... Start Gener…" without nowrap | fix: Shorten the label or set nowrap
+  WARN 49 :1015 long clickable label "Publishing to Meta Suite... Publish…" without nowrap
+  WARN 74 :407 default palette instead of theme tokens: 59 distinct palette classes (text-slate-500 text-slate-400 text-slate-900 bg-b… | fix: Extend the Tailwind theme with the Hallmark tokens and use those names
+  WARN F2 :512 three-period ellipsis in prose x3 | fix: Use a true ellipsis character (…)
+src/app/new/page.tsx
+  WARN 11 :608 group-hover:scale-105 on <img class="h-full w-full object-cover grou…">: the image moves on hover | fix: Imagery sits still; give the container the feedback
+  WARN 49 :316 long clickable label "Quick topic or concept AI scriptwri…" without nowrap
+  WARN 49 :334 long clickable label "Full custom script Paste your own m…" without nowrap
+  WARN 49 :475 long clickable label "Both Formats Recommended Generate 9…" without nowrap
+  WARN 49 :494 long clickable label "9:16 Vertical Optimized for Instagr…" without nowrap
+  WARN 49 :510 long clickable label "16:9 Landscape Optimized for Facebo…" without nowrap
+  WARN 74 :285 default palette instead of theme tokens: 56 distinct palette classes (border-lime-300 bg-lime-100 text-lime-800 border-…
+  WARN F24 :791 a hairline border under a wide soft shadow (border with shadow-xl or shadow-2xl) | fix: Commit to one: a defined edge, or elevation by shadow
+src/components/header/TopBar.tsx
+  WARN 11 :173 group-hover:scale-105 on <img class="h-8 w-8 rounded-xl shadow-card …">: the image moves on hover
+  WARN 29 :169 glass: backdrop-blur-2xl over bg-paper/85 on <header class="window-drag sticky top-0 z-50 f…"> | fix: Solid or grained surface; elevation by lightness, shadows with offset and blur
+  WARN 49 :261 long clickable label "@ Reels No Instagram attached" without nowrap
+  WARN 49 :333 long clickable label "Chrome Ready Tab Hidden! CLI Ready …" without nowrap
+  WARN F24 :239 a hairline border under a wide soft shadow (border with shadow-xl or shadow-2xl)
+src/styles/globals.css
+  WARN 23 :260 accent background on viewport-scale rule ".studio-hero" | fix: Accent stays <= 5% of a viewport; large fills belong to paper/field tokens or a declared posture in the stamp
+  WARN 29 :60 glass panel: backdrop-filter blur over a translucent black on .glass-panel | fix: Solid or grained surface; elevation by lightness
+  WARN 29 :67 glass panel: backdrop-filter blur over a translucent black on .glass-card
+  WARN 29 :236 glass panel: backdrop-filter blur over a translucent black on .floating-prompt-bar
+  WARN 41 :246 dark surface (L 18%) on .studio-card sets no text colour | fix: Swap text to paper in the same rule
+  WARN F4 :139 3 filled primary-button recipes: .pill-btn-lime + .btn-outline[aria-pressed="true"] … | fix: One filled primary per page; demote the rest to outline/quiet variants
+  WARN F24 :70 a hairline border under a wide soft shadow on .glass-card
+src/app/page.tsx
+  WARN 29 :203 blurred orb: blur-3xl on a filled absolute element on <div class="absolute -right-16 -top-16 h-72…">
+  WARN 29 :204 blurred orb: blur-3xl on a filled absolute element on <div class="absolute -left-16 -bottom-16 h-…">
+  WARN 74 :81 default palette instead of theme tokens: 49 distinct palette classes (bg-emerald-100 bg-emerald-500 text-emerald-800 te…
+  WARN F2 :269 three-period ellipsis in prose x1
+src/app/setup/page.tsx
+  WARN 49 :253 long clickable label "Waiting for browser login... Connec…" without nowrap
+  WARN 49 :302 long clickable label "Validating token... Save & Connect …" without nowrap
+  WARN 74 :109 default palette instead of theme tokens: 41 distinct palette classes (border-lime-300 bg-lime-100 text-lime-800 text-sl…
+  WARN F2 :261 three-period ellipsis in prose x2
+src/app/settings/page.tsx
+  WARN 74 :90 default palette instead of theme tokens: 23 distinct palette classes (text-slate-600 text-slate-300 border-lime-300 bg-…
+src/components/onboarding/AgyOnboardingModal.tsx
+  WARN 74 :114 default palette instead of theme tokens: 39 distinct palette classes (text-slate-900 text-slate-100 border-slate-200 bg…
+  WARN F24 :101 a hairline border under a wide soft shadow (border with shadow-xl or shadow-2xl)
+sloplint: 14 FAIL, 5 REFLEX, 39 WARN across 12 file(s) and 5 URL(s).
+kept: links 7/7, fields 10/10, handlers 76/76, headings 7/7, figures 3/3; before 387 FAIL, 13 REFLEX, now 14 FAIL, 5 REFLEX
+compare: .hallmark/compare.html shows before and after side by side

@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className="dark overflow-x-clip" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -28,7 +28,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-studio-950 font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-purple-500 selection:text-white">
+      <body className="min-h-screen overflow-x-clip bg-studio-950 font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-purple-500 selection:text-overlay-ink">
         <ThemeProvider>
           <TopBar />
           <main className="container mx-auto p-6 max-w-7xl">{children}</main>

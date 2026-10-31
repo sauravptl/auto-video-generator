@@ -1,0 +1,111 @@
+/* CineFlow AI brand tokens. Light is :root, dark is .dark (matches ThemeProvider).
+   Every colour and face the app paints resolves here; no literal past this block. */
+:root {
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.2rem; --text-xl: 1.44rem; --text-2xl: 1.728rem; --text-3xl: 2.074rem;
+  --text-display-s: 1.44rem; --text-display: 1.728rem; --text-section: 1.2rem; --text-title: 1rem; --text-lead: 1rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --ease-in: cubic-bezier(0.7, 0, 0.84, 0); --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms; --dur-short: 220ms; --dur-long: 420ms;
+  --container: 1280px; --gutter: 24px; --gap-columns: 24px;
+  --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
+
+  /* Light paper: tinted off-white with hint of sage, never pure #fff (Gate 7a) */
+  --color-paper: oklch(98% 0.006 150);
+  --color-paper-2: oklch(99.4% 0.003 150);
+  --color-paper-3: oklch(94.5% 0.010 150);
+  --color-ink: oklch(22% 0.012 152);
+  --color-ink-2: oklch(34% 0.014 152);
+  --color-muted: oklch(50% 0.014 152);
+  --color-rule: oklch(72% 0.014 152);
+
+  /* Lime brand #BFF97E on dark, on light it becomes a crisp, legible forest/emerald green */
+  --color-accent: oklch(48% 0.17 138);
+  --color-accent-2: oklch(56% 0.15 146);
+  --color-accent-glow: oklch(88% 0.08 142);
+  --color-accent-ink: oklch(98% 0.01 138);
+  --color-focus: oklch(48% 0.17 138);
+  --color-success: oklch(50% 0.13 152);
+  --color-error: oklch(52% 0.19 27);
+  --color-warning: oklch(58% 0.13 75);
+  --color-info: oklch(52% 0.13 250);
+  /* soft fills for status badges, one step off the surface */
+  --color-success-glow: oklch(96% 0.03 152);
+  --color-error-glow: oklch(96% 0.025 25);
+  --color-warning-glow: oklch(96% 0.035 85);
+  --color-info-glow: oklch(96% 0.025 250);
+  /* media overlays: sit on video/shimmer in BOTH modes, never flip */
+  --color-overlay: oklch(14% 0.008 152);
+  --color-overlay-ink: oklch(98% 0.004 150);
+
+  /* Legacy studio semantic palette */
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --studio-950: var(--color-paper);
+  --studio-900: var(--color-paper-2);
+  --studio-850: var(--color-paper-3);
+  --studio-800: oklch(91% 0.012 152);
+  --studio-700: oklch(82% 0.012 152);
+  --studio-600: oklch(62% 0.014 152);
+  --studio-500: oklch(44% 0.014 152);
+  --card-glass: oklch(99.4% 0.003 150 / 0.94);
+  --panel-glass: oklch(99.4% 0.003 150 / 0.98);
+  --border-glass: oklch(22% 0.012 152 / 0.09);
+  --lime-accent: var(--color-accent);
+  --lime-badge-bg: oklch(96% 0.04 138);
+  --lime-badge-border: oklch(88% 0.08 138);
+
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", system-ui, sans-serif;
+  --font-outlier: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
+
+  --radius-card: 20px; --radius-pill: 9999px; --rule-hair: 1px;
+  --shadow-card: 0 1px 3px oklch(30% 0.02 152 / 0.06), 0 12px 28px oklch(30% 0.02 152 / 0.07);
+  --tracking-display: -0.02em;
+}
+
+.dark {
+  /* Obsidian ground, tinted toward the lime hue, never pure #000 (Gate 7a) */
+  --color-paper: oklch(14% 0.008 152);
+  --color-paper-2: oklch(18% 0.010 152);
+  --color-paper-3: oklch(22% 0.012 152);
+  --color-ink: oklch(97% 0.006 150);
+  --color-ink-2: oklch(86% 0.008 152);
+  --color-muted: oklch(64% 0.012 152);
+  --color-rule: oklch(28% 0.012 152);
+
+  /* Lime #BFF97E & Mint #98F899 on obsidian */
+  --color-accent: oklch(92% 0.17 121);
+  --color-accent-2: oklch(90% 0.15 142);
+  --color-accent-glow: oklch(95% 0.08 155);
+  --color-accent-ink: oklch(16% 0.02 140);
+  --color-focus: oklch(92% 0.17 121);
+  --color-success: oklch(72% 0.15 152);
+  --color-error: oklch(66% 0.19 25);
+  --color-warning: oklch(78% 0.14 85);
+  --color-info: oklch(72% 0.13 250);
+  --color-success-glow: oklch(72% 0.15 152 / 0.14);
+  --color-error-glow: oklch(66% 0.19 25 / 0.14);
+  --color-warning-glow: oklch(78% 0.14 85 / 0.14);
+  --color-info-glow: oklch(72% 0.13 250 / 0.14);
+  --color-overlay: oklch(14% 0.008 152);
+  --color-overlay-ink: oklch(98% 0.004 150);
+
+  /* Legacy studio semantic palette */
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --studio-950: var(--color-paper);
+  --studio-900: var(--color-paper-2);
+  --studio-850: var(--color-paper-3);
+  --studio-800: oklch(25% 0.012 152);
+  --studio-700: oklch(32% 0.012 152);
+  --studio-600: oklch(44% 0.014 152);
+  --studio-500: oklch(58% 0.014 152);
+  --card-glass: oklch(18% 0.010 152 / 0.85);
+  --panel-glass: oklch(16% 0.008 152 / 0.94);
+  --border-glass: oklch(97% 0.006 150 / 0.09);
+  --lime-accent: var(--color-accent);
+  --lime-badge-bg: oklch(92% 0.17 121 / 0.12);
+  --lime-badge-border: oklch(92% 0.17 121 / 0.35);
+
+  --shadow-card: 0 1px 3px oklch(0% 0 0 / 0.4), 0 16px 36px oklch(0% 0 0 / 0.55);
+}

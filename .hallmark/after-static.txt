@@ -1,0 +1,1 @@
+(eval):1: no such file or directory: /Users/geniussau/.npm/_npx//node_modules/.bin/sloplint

@@ -3,6 +3,16 @@ import path from 'path';
 import { app } from 'electron';
 import type { Project } from '../../shared/types';
 import type { MetaTokens } from '../../shared/meta-types';
+import type { ScriptProviderConfig } from '../../shared/script-agent-types';
+
+const defaultProviders: ScriptProviderConfig[] = [
+  { id: 'agy', name: 'AGY CLI', type: 'agy-cli', enabled: true },
+  { id: 'local-fallback', name: 'Local storyboard fallback', type: 'local-fallback', enabled: false },
+];
+
+const defaultRedirectUri = 'http://127.0.0.1:54321/auth/callback';
+
+export const defaultScriptProviders = defaultProviders;
 
 export interface AppSchema {
   projects: Record<string, Project>;
@@ -10,11 +20,14 @@ export interface AppSchema {
   settings: {
     metaAppId: string;
     metaAppSecret: string;
+    metaRedirectUri: string;
     ffmpegPath: string;
     flowModel: string;
     defaultFormat: string;
     autoPublish: boolean;
     whatsappPhoneNumberId?: string;
+    scriptProviders: ScriptProviderConfig[];
+    defaultScriptProviderId?: string;
   };
 }
 
@@ -53,6 +66,7 @@ class JsonStore {
         if (stats.mtimeMs > this.lastMtimeMs) {
           const fileContent = fs.readFileSync(this.path, 'utf-8');
           this.data = { ...this.loadDefaults(), ...JSON.parse(fileContent) };
+          this.data.settings = { ...this.loadDefaults().settings, ...(this.data.settings || {}) };
           this.lastMtimeMs = stats.mtimeMs;
         }
       } catch (e) {
@@ -68,10 +82,13 @@ class JsonStore {
       settings: {
         metaAppId: process.env.META_APP_ID || '',
         metaAppSecret: process.env.META_APP_SECRET || '',
+        metaRedirectUri: defaultRedirectUri,
         ffmpegPath: '/Users/geniussau/.local/bin/ffmpeg',
         flowModel: 'veo-3.1-fast',
         defaultFormat: 'both',
         autoPublish: true,
+        scriptProviders: defaultProviders,
+        defaultScriptProviderId: 'agy',
       },
     };
   }

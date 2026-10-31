@@ -1,9 +1,6 @@
 export interface MetaTokens {
-  userAccessToken?: string;
-  longLivedUserToken?: string;
-  tokenExpiresAt?: number; // timestamp ms
+  tokenExpiresAt?: number;
   selectedPageId?: string;
-  pageAccessToken?: string;
   instagramAccountId?: string;
   instagramUsername?: string;
   whatsappPhoneNumberId?: string;
@@ -14,7 +11,6 @@ export interface FacebookPage {
   id: string;
   name: string;
   category: string;
-  accessToken: string;
   instagramBusinessAccount?: {
     id: string;
     username: string;
@@ -32,16 +28,10 @@ export interface WhatsAppPhoneNumber {
 
 export interface MetaConnectionStatus {
   isConnected: boolean;
-  user?: {
-    id: string;
-    name: string;
-  };
+  user?: { id: string; name: string };
   pages: FacebookPage[];
   selectedPage?: FacebookPage;
-  instagramAccount?: {
-    id: string;
-    username: string;
-  };
+  instagramAccount?: { id: string; username: string };
   whatsappPhone?: WhatsAppPhoneNumber;
   tokenExpiresInDays?: number;
 }

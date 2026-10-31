@@ -11,6 +11,9 @@ import { AgyClient } from './integrations/agy/agy-client';
 import { FFmpegEngine } from './integrations/ffmpeg/ffmpeg-engine';
 import { MetaClient } from './integrations/meta/meta-client';
 import { PipelineOrchestrator } from './core/pipeline-orchestrator';
+import { SettingsService } from './core/settings-service';
+import { migrateLegacyPlaintextSecrets } from './core/migrate';
+import { ScriptProviderService } from './core/script-provider-service';
 
 // Register privileged custom schemes
 protocol.registerSchemesAsPrivileged([
@@ -131,6 +134,8 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  migrateLegacyPlaintextSecrets();
+
   // Protocol handler for serving static Next.js production build offline
   protocol.handle('app', (request) => {
     try {
@@ -265,6 +270,12 @@ function registerIpcHandlers() {
     return AgyClient.testConnection();
   });
 
+  // Settings and script providers. Secrets are write-only and never cross IPC back to the renderer.
+  ipcMain.handle(IPC_CHANNELS.SETTINGS_GET, async () => SettingsService.getSnapshot());
+  ipcMain.handle(IPC_CHANNELS.SETTINGS_SAVE, async (_event, update) => SettingsService.save(update));
+  ipcMain.handle(IPC_CHANNELS.SCRIPT_PROVIDERS_LIST, async () => ScriptProviderService.listConfigured());
+  ipcMain.handle(IPC_CHANNELS.SCRIPT_PROVIDER_TEST, async (_event, providerId: string) => ScriptProviderService.test(providerId));
+
   // Video Assembly
   ipcMain.handle(IPC_CHANNELS.VIDEO_ASSEMBLE, async (_event, projectId: string) => {
     return FFmpegEngine.assembleProject(projectId, (percent, message) => {
@@ -322,8 +333,8 @@ function registerIpcHandlers() {
   // Projects & Pipeline
   ipcMain.handle(
     IPC_CHANNELS.PROJECT_CREATE,
-    async (_event, { topic, format, publishTargets, referenceImages, autoPublish }) => {
-      return ProjectManager.createProject(topic, format, publishTargets, referenceImages, autoPublish);
+    async (_event, { topic, format, publishTargets, referenceImages, autoPublish, scriptProviderId }) => {
+      return ProjectManager.createProject(topic, format, publishTargets, referenceImages, autoPublish, scriptProviderId);
     }
   );
 

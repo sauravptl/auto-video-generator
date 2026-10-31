@@ -73,7 +73,8 @@ export class AgyClient {
   public static async generateScript(
     topic: string,
     format: VideoFormat,
-    referenceImages?: string[]
+    referenceImages?: string[],
+    allowFallback = true
   ): Promise<VideoScript> {
     const trimmed = topic.trim();
 
@@ -94,12 +95,14 @@ export class AgyClient {
         const agyScript = await this.generateWithAgy(topic, format, referenceImages);
         if (agyScript) return agyScript;
       } catch (err) {
+        if (!allowFallback) throw err;
         console.warn('AGY execution encountered an error, using intelligent prompt builder fallback:', err);
       }
+    } else if (!allowFallback) {
+      throw new Error('AGY CLI is not installed or authenticated. Configure another script provider or install AGY.');
     }
 
-    // High quality intelligent prompt builder fallback
-    return this.generateFallbackScript(topic, format, referenceImages);
+    return this.generateLocalFallback(topic, format, referenceImages);
   }
 
   /**
@@ -299,7 +302,7 @@ Ensure each visualPrompt is descriptive and visual (avoid text overlays in the p
     });
   }
 
-  private static generateFallbackScript(
+  public static generateLocalFallback(
     topic: string,
     format: VideoFormat,
     referenceImages?: string[]

@@ -29,7 +29,8 @@ export class ProjectManager {
     format: VideoFormat,
     publishTargets: PublishTargets,
     referenceImages?: string[],
-    autoPublish: boolean = false
+    autoPublish: boolean = false,
+    scriptProviderId?: string
   ): Project {
     const id = `proj_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
@@ -77,6 +78,7 @@ export class ProjectManager {
       title,
       topic,
       format,
+      scriptProviderId,
       referenceImages: savedImages,
       publishTargets,
       autoPublish,
