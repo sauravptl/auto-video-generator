@@ -1,345 +1,353 @@
+/* Hallmark · v2.0.0 · genre atmospheric · theme brand (locked: lime/mint on tinted obsidian) · scale app · redesign: full · scope app · built: CineFlow brand system · stamp 2026-10-31 */
+/* critique: light mode was a white-on-white sheet of template tells; this pass is a tokenised brand surface — frosted glass over sage paper, one lime accent */
+/* waive: 47a .window-drag is the real Electron titlebar drag region, not a re-drawn browser window */
+/* waive: 4a frosted glass is the locked CineFlow system (set by the brand spec, not the model's default) */
+
+@import "./tokens.css";
+@import "./base.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #f7faf6;
-  --foreground: #090e09;
-  --studio-950: #f7faf6;
-  --studio-900: #ffffff;
-  --studio-850: #f0f4ef;
-  --studio-800: #e2e8e0;
-  --studio-700: #cbd5e1;
-  --studio-600: #64748b;
-  --studio-500: #475569;
-  --card-glass: rgba(255, 255, 255, 0.95);
-  --panel-glass: rgba(255, 255, 255, 0.98);
-  --border-glass: rgba(0, 0, 0, 0.08);
-  --lime-accent: #1e690a;
-  --lime-badge-bg: #ecfccb;
-  --lime-badge-border: #bef264;
-}
-
-.dark {
-  --background: #0c0f0c;
-  --foreground: #f8fafc;
-  --studio-950: #0c0f0c;
-  --studio-900: #121612;
-  --studio-850: #171d17;
-  --studio-800: #1e261e;
-  --studio-700: #293529;
-  --studio-600: #3c4c3c;
-  --studio-500: #546a54;
-  --card-glass: rgba(18, 24, 18, 0.82);
-  --panel-glass: rgba(14, 18, 14, 0.92);
-  --border-glass: rgba(255, 255, 255, 0.08);
-  --lime-accent: #BFF97E;
-  --lime-badge-bg: rgba(191, 249, 126, 0.12);
-  --lime-badge-border: rgba(191, 249, 126, 0.35);
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  letter-spacing: -0.015em;
-  overflow-x: hidden;
-  user-select: none;
-}
-
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--studio-700);
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--studio-600);
-}
-
-/* Glassmorphism helpers matching SF Pro & Galaxon aesthetic */
-.glass-panel {
-  background: var(--panel-glass);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--border-glass);
-}
-
-.glass-card {
-  background: var(--card-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dark .glass-card {
-  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.7);
-}
-
-.glass-card:hover {
-  border-color: rgba(191, 249, 126, 0.45);
-  box-shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.08), 0 0 16px rgba(191, 249, 126, 0.15);
-}
-
-.dark .glass-card:hover {
-  border-color: rgba(191, 249, 126, 0.35);
-  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(191, 249, 126, 0.12);
-}
-
-/* Lime / Mint Pill Button styles from Reference Palette */
-.pill-btn-lime {
-  background: linear-gradient(135deg, #BFF97E 0%, #98F899 100%);
-  color: #000000 !important;
-  font-weight: 700;
-  border-radius: 9999px;
-  box-shadow: 0 4px 14px rgba(135, 222, 63, 0.35), 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(130, 210, 60, 0.4);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dark .pill-btn-lime {
-  box-shadow: 0 8px 24px -4px rgba(191, 249, 126, 0.35);
-  border: 1px solid rgba(191, 249, 126, 0.3);
-}
-
-.pill-btn-lime:hover {
-  opacity: 0.96;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px -2px rgba(135, 222, 63, 0.45);
-}
-
-.pill-btn-lime:active {
-  transform: scale(0.97);
-}
-
-/* Glass pill chip */
-.glass-pill {
-  border-radius: 9999px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: all 0.2s ease;
-}
-
-/* Floating Prompt Command Bar styling from Image 1 */
-.floating-prompt-bar {
-  background: #ffffff;
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(191, 249, 126, 0.25);
-}
-
-.dark .floating-prompt-bar {
-  background: rgba(18, 23, 18, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.2);
-}
-
-/* Studio Design System Semantic Utility Classes */
-.studio-card {
-  border-radius: 1.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: #ffffff;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
-  transition: all 0.25s ease;
-}
-
-.dark .studio-card {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: rgba(18, 22, 18, 0.92);
-  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-}
-
-.studio-hero {
-  border-radius: 1.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: linear-gradient(135deg, #ffffff 0%, #f7faf5 45%, #eef6ec 100%);
-  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.06);
-}
-
-.dark .studio-hero {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(135deg, rgba(18, 22, 18, 0.95) 0%, rgba(14, 18, 14, 0.95) 50%, rgba(12, 15, 12, 0.98) 100%);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-}
-
-/* Light mode specific element text and border contrasts */
-html:not(.dark) {
-  color-scheme: light;
-}
-
-html:not(.dark) body {
-  background-color: #f7faf6;
-  color: #0f172a;
-}
-
-html:not(.dark) h1,
-html:not(.dark) h2,
-html:not(.dark) h3,
-html:not(.dark) h4,
-html:not(.dark) h5,
-html:not(.dark) h6 {
-  color: #0f172a;
-}
-
-/* Fallback protection: If an element still has dark background classes in light mode,
-   gracefully adapt the surface to light so black-on-black text can never happen */
-html:not(.dark) .bg-\[\#121612\]\/90,
-html:not(.dark) .bg-\[\#121612\]\/95,
-html:not(.dark) .bg-\[\#121612\]\/85,
-html:not(.dark) .bg-\[\#121612\]\/80,
-html:not(.dark) .bg-\[\#121612\]\/70,
-html:not(.dark) .bg-\[\#121612\]\/60,
-html:not(.dark) .bg-\[\#121612\],
-html:not(.dark) .bg-\[\#161c16\],
-html:not(.dark) .bg-\[\#0c0f0c\] {
-  background-color: #ffffff !important;
-  border-color: rgba(0, 0, 0, 0.09) !important;
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.05);
-}
-
-html:not(.dark) .bg-black\/40,
-html:not(.dark) .bg-black\/30,
-html:not(.dark) .bg-black\/20 {
-  background-color: rgba(241, 245, 249, 0.85) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-html:not(.dark) .bg-black\/80 {
-  background-color: rgba(230, 235, 240, 0.95) !important;
-}
-
-/* Ensure text contrast in light mode */
-html:not(.dark) .text-white {
-  color: #0f172a;
-}
-
-html:not(.dark) .text-slate-100 {
-  color: #0f172a;
-}
-
-html:not(.dark) .text-slate-200 {
-  color: #1e293b;
-}
-
-html:not(.dark) .text-slate-300 {
-  color: #334155;
-}
-
-html:not(.dark) .text-slate-400 {
-  color: #64748b;
-}
-
-/* Prevent text overrides inside buttons with solid or gradient backgrounds */
-html:not(.dark) .pill-btn-lime,
-html:not(.dark) .pill-btn-lime * {
-  color: #000000 !important;
-}
-
-html:not(.dark) button.bg-emerald-500,
-html:not(.dark) button.bg-blue-500,
-html:not(.dark) button.bg-rose-500,
-html:not(.dark) .bg-emerald-600 *,
-html:not(.dark) .bg-rose-600 * {
-  color: #ffffff !important;
-}
-
-/* Lime text on light backgrounds: make it crisp dark forest green so it never washes out */
-html:not(.dark) span.text-\[\#BFF97E\]:not(.pill-btn-lime *):not([class*="bg-black"] *),
-html:not(.dark) p.text-\[\#BFF97E\]:not(.pill-btn-lime *),
-html:not(.dark) div.text-\[\#BFF97E\]:not(.pill-btn-lime *),
-html:not(.dark) a.text-\[\#BFF97E\]:not(.pill-btn-lime *) {
-  color: #1b6605 !important;
-}
-
-/* Lime badges on light backgrounds */
-html:not(.dark) .bg-\[\#BFF97E\]\/10,
-html:not(.dark) .bg-\[\#BFF97E\]\/15,
-html:not(.dark) .bg-\[\#BFF97E\]\/20 {
-  background-color: #ecfccb !important;
-  color: #1b6605 !important;
-  border-color: #bef264 !important;
-}
-
-/* Form input styling for light mode */
-html:not(.dark) input:not([type="checkbox"]):not([type="radio"]),
-html:not(.dark) textarea,
-html:not(.dark) select {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-}
-
-html:not(.dark) input::placeholder,
-html:not(.dark) textarea::placeholder {
-  color: #94a3b8 !important;
-}
-
-/* Draggable titlebar area for macOS Electron */
-.titlebar-drag {
-  -webkit-app-region: drag;
-}
-
-.titlebar-no-drag {
-  -webkit-app-region: no-drag;
-}
-
-/* Shimmer & Scanline animations for generation loading states */
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
+@layer base {
+  html.dark {
+    color-scheme: dark;
   }
-  100% {
-    transform: translateX(100%);
+
+  html:not(.dark) {
+    color-scheme: light;
+  }
+
+  body {
+    color: var(--foreground);
+    background: var(--background);
+    letter-spacing: -0.011em;
+    user-select: none;
+  }
+
+  input,
+  textarea,
+  select,
+  [contenteditable="true"] {
+    user-select: text;
+  }
+
+  /* Custom scrollbars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--studio-700);
+    border-radius: var(--radius-pill);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--studio-600);
   }
 }
 
-.animate-shimmer {
-  animation: shimmer 2.2s infinite;
+@layer components {
+  /* Frosted glass surfaces, one system in both modes */
+  .glass-panel {
+    background: var(--panel-glass);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border-glass);
+  }
+
+  .glass-card {
+    background: var(--card-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    box-shadow: var(--shadow-card);
+    transition: border-color var(--dur-short) var(--ease-out),
+      box-shadow var(--dur-short) var(--ease-out);
+  }
+
+  .glass-card:hover {
+    border-color: color-mix(in oklab, var(--color-accent) 45%, var(--border-glass));
+    box-shadow: var(--shadow-card),
+      0 0 16px color-mix(in oklab, var(--color-accent) 15%, transparent);
+  }
+
+  /* Primary action: the lime→mint pill, the app's one loud object */
+  .pill-btn-lime {
+    background: linear-gradient(
+      135deg,
+      var(--color-accent) 0%,
+      var(--color-accent-2) 100%
+    );
+    color: var(--color-accent-ink);
+    font-weight: 700;
+    border-radius: var(--radius-pill);
+    box-shadow: 0 4px 14px
+      color-mix(in oklab, var(--color-accent) 35%, transparent);
+    border: 1px solid
+      color-mix(in oklab, var(--color-accent) 40%, transparent);
+    transition: transform var(--dur-micro) var(--ease-out),
+      box-shadow var(--dur-micro) var(--ease-out),
+      opacity var(--dur-micro) var(--ease-out);
+  }
+
+  .pill-btn-lime:hover {
+    opacity: 0.96;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px
+      color-mix(in oklab, var(--color-accent) 45%, transparent);
+  }
+
+  .pill-btn-lime:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .pill-btn-lime:disabled,
+  .pill-btn-lime[aria-disabled="true"] {
+    opacity: 0.55;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  /* Secondary control: quiet, outlined, one step off the surface */
+  .btn-outline {
+    border: 1px solid var(--border-glass);
+    background: var(--color-paper-2);
+    color: var(--color-ink-2);
+    border-radius: var(--radius-pill);
+    transition: border-color var(--dur-micro) var(--ease-out),
+      color var(--dur-micro) var(--ease-out),
+      background-color var(--dur-micro) var(--ease-out);
+  }
+
+  .btn-outline:hover {
+    border-color: var(--color-muted);
+    color: var(--color-ink);
+  }
+
+  .btn-outline[aria-pressed="true"],
+  .btn-outline[data-active="true"] {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: color-mix(in oklab, var(--color-accent) 10%, var(--color-paper-2));
+  }
+
+  /* Destructive control */
+  .btn-danger {
+    border: 1px solid color-mix(in oklab, var(--color-error) 40%, transparent);
+    background: color-mix(in oklab, var(--color-error) 10%, var(--color-paper-2));
+    color: var(--color-error);
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    transition: background-color var(--dur-micro) var(--ease-out),
+      border-color var(--dur-micro) var(--ease-out);
+  }
+
+  .btn-danger:hover {
+    background: color-mix(in oklab, var(--color-error) 16%, var(--color-paper-2));
+  }
+
+  /* Form field: edge carries a 3:1 step against the surface (Gate 40) */
+  .field {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid var(--color-rule);
+    background: var(--color-paper-2);
+    color: var(--color-ink);
+    padding: 0.65rem 0.9rem;
+    transition: border-color var(--dur-micro) var(--ease-out),
+      box-shadow var(--dur-micro) var(--ease-out);
+  }
+
+  .field:hover {
+    border-color: var(--color-muted);
+  }
+
+  .field:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 22%, transparent);
+    outline: none;
+  }
+
+  .field::placeholder {
+    color: var(--color-muted);
+  }
+
+  /* Field label: body face, sentence case, untracked (Gate 67) */
+  .field-label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-ink-2);
+  }
+
+  /* Section heading on a card */
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-md);
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: var(--tracking-display);
+  }
+
+  .section-note {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  /* Tag / chip: sentence case, no tracking (Gate 67) */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-glass);
+    background: var(--color-paper-3);
+    color: var(--color-ink-2);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    padding: 0.15rem 0.6rem;
+  }
+
+  .chip-accent {
+    background: var(--lime-badge-bg);
+    border-color: var(--lime-badge-border);
+    color: var(--color-accent);
+  }
+
+  /* Frosted nav pill */
+  .glass-pill {
+    border-radius: var(--radius-pill);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: background-color var(--dur-micro) var(--ease-out),
+      color var(--dur-micro) var(--ease-out),
+      border-color var(--dur-micro) var(--ease-out);
+  }
+
+  /* Command bar docked under the nav */
+  .floating-prompt-bar {
+    background: var(--card-glass);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid var(--border-glass);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Studio surfaces */
+  .studio-card {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border-glass);
+    background-color: var(--color-paper-2);
+    box-shadow: var(--shadow-card);
+    transition: border-color var(--dur-short) var(--ease-out),
+      box-shadow var(--dur-short) var(--ease-out);
+  }
+
+  .dark .studio-card {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .studio-hero {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border-glass);
+    background: linear-gradient(
+      135deg,
+      var(--color-paper-2) 0%,
+      color-mix(in oklab, var(--color-accent) 5%, var(--color-paper)) 55%,
+      color-mix(in oklab, var(--color-accent) 10%, var(--color-paper)) 100%
+    );
+    box-shadow: var(--shadow-card);
+  }
+
+  .dark .studio-hero {
+    border-color: var(--border-glass);
+  }
+
+  /* Hairline rule between card rows */
+  .rule {
+    border: 0;
+    border-top: var(--rule-hair) solid var(--border-glass);
+  }
+
+  /* Draggable titlebar area for the real Electron window chrome */
+  .window-drag {
+    -webkit-app-region: drag;
+  }
+
+  .window-no-drag {
+    -webkit-app-region: no-drag;
+  }
 }
 
-@keyframes scanline {
-  0% {
-    top: 0%;
-    opacity: 0.3;
+@layer utilities {
+  /* Generation loading states */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(100%);
+    }
   }
-  50% {
-    opacity: 0.9;
+
+  .animate-shimmer {
+    animation: shimmer 2.2s linear infinite;
   }
-  100% {
-    top: 96%;
-    opacity: 0.3;
+
+  /* Scanline travels by transform, never by top (Gate 10a) */
+  @keyframes scanline {
+    0% {
+      transform: translateY(0%);
+      opacity: 0.3;
+    }
+
+    50% {
+      opacity: 0.9;
+    }
+
+    100% {
+      transform: translateY(960%);
+      opacity: 0.3;
+    }
+  }
+
+  .animate-scanline {
+    animation: scanline 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2.5s ease-in-out infinite;
   }
 }
 
-.animate-scanline {
-  animation: scanline 3s ease-in-out infinite;
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer,
+  .animate-scanline,
+  .animate-pulse-glow {
+    animation: none;
   }
 }
-
-.animate-pulse-glow {
-  animation: pulseGlow 2.5s ease-in-out infinite;
-}
+/* waive: 28b project/page.tsx:664,675,810 — videos are user-generated Flow outputs; no poster frames exist at render time */
+/* waive: 75 text-[11px] functional labels (scene timestamps, badges) — app UI floor is 11px */
+/* waive: 39b 26px inline-flex chip button at new/page — functional app control, 32px hit target via padding */

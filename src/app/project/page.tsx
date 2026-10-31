@@ -313,7 +313,7 @@ function ProjectTrackerContent() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-lime-500 dark:border-[#BFF97E] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-lime border-t-transparent" />
       </div>
     );
   }
@@ -324,7 +324,7 @@ function ProjectTrackerContent() {
         <p className="text-slate-500 dark:text-slate-400">Project not found or was removed.</p>
         <Link
           href="/"
-          className="pill-btn-lime px-5 py-2 text-xs font-bold text-black"
+          className="pill-btn-lime px-5 py-2 text-xs font-bold text-brand-ink"
         >
           Return to Dashboard
         </Link>
@@ -394,13 +394,13 @@ function ProjectTrackerContent() {
         <div className="flex items-center space-x-3.5">
           <Link
             href="/"
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:border-lime-400 dark:hover:border-[#BFF97E]/40 transition-colors shadow-sm"
+            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 dark:border-rule bg-paper-2 dark:bg-paper-2/5 text-slate-700 dark:text-slate-300 hover:text-brand-ink dark:hover:text-overlay-ink hover:border-brand-lime/50 transition-colors shadow-sm"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
             <div className="flex items-center space-x-2.5">
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white line-clamp-1">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-overlay-ink line-clamp-1">
                 {project.title}
               </h1>
               {isScriptReady && (
@@ -409,8 +409,8 @@ function ProjectTrackerContent() {
                 </span>
               )}
               {isGenerating && (
-                <span className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-lime-100 dark:bg-[#BFF97E]/20 border border-lime-300 dark:border-[#BFF97E]/40 text-lime-800 dark:text-[#BFF97E] font-bold animate-pulse">
-                  <span className="h-1.5 w-1.5 rounded-full bg-lime-500 dark:bg-[#BFF97E]" />
+                <span className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-brand-lime/20 border border-brand-lime/40 text-brand-lime font-bold animate-pulse">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand-lime" />
                   <span>Generating Video</span>
                 </span>
               )}
@@ -437,7 +437,7 @@ function ProjectTrackerContent() {
             <button
               onClick={handlePauseGeneration}
               disabled={isPausingOrResuming}
-              className="inline-flex items-center space-x-1.5 rounded-full border border-amber-400 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-all shadow-sm"
+              className="inline-flex items-center space-x-1.5 rounded-full border border-amber-400 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors shadow-sm"
             >
               <Pause className="h-3.5 w-3.5" />
               <span>{isPausingOrResuming ? 'Pausing...' : 'Pause'}</span>
@@ -448,7 +448,7 @@ function ProjectTrackerContent() {
             <button
               onClick={handleResumeGeneration}
               disabled={isPausingOrResuming}
-              className="inline-flex items-center space-x-1.5 rounded-full pill-btn-lime px-4 py-2 text-xs font-bold text-black"
+              className="inline-flex items-center space-x-1.5 rounded-full pill-btn-lime px-4 py-2 text-xs font-bold text-brand-ink"
             >
               <Play className="h-3.5 w-3.5 fill-black" />
               <span>{isPausingOrResuming ? 'Resuming...' : 'Resume Generation'}</span>
@@ -458,7 +458,7 @@ function ProjectTrackerContent() {
           {hasOutputVideos && (
             <button
               onClick={handleOpenFolder}
-              className="inline-flex items-center space-x-1.5 rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-black dark:hover:text-white transition-colors shadow-sm"
+              className="inline-flex items-center space-x-1.5 rounded-full border border-slate-200 dark:border-rule bg-paper-2 dark:bg-paper-2/5 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-paper-2/10 hover:text-brand-ink dark:hover:text-overlay-ink transition-colors shadow-sm"
             >
               <FolderOpen className="h-3.5 w-3.5" />
               <span>Finder</span>
@@ -468,7 +468,7 @@ function ProjectTrackerContent() {
           {hasOutputVideos && (
             <button
               onClick={handleOpenFolder}
-              className="inline-flex items-center space-x-1.5 pill-btn-lime px-5 py-2 text-xs font-bold text-black shadow-md shadow-[#BFF97E]/20"
+              className="inline-flex items-center space-x-1.5 pill-btn-lime px-5 py-2 text-xs font-bold text-brand-ink shadow-md shadow-brand-lime/20"
             >
               <Download className="h-3.5 w-3.5" />
               <span>Download Video</span>
@@ -478,7 +478,7 @@ function ProjectTrackerContent() {
           {project.status === 'scenes_ready' && (
             <button
               onClick={handleManualAssemble}
-              className="inline-flex items-center space-x-1.5 pill-btn-lime px-5 py-2 text-xs font-bold text-black shadow-md shadow-[#BFF97E]/20 transition-all"
+              className="inline-flex items-center space-x-1.5 pill-btn-lime px-5 py-2 text-xs font-bold text-brand-ink shadow-md shadow-brand-lime/20 transition-colors"
             >
               <Film className="h-3.5 w-3.5" />
               <span>Assemble Now</span>
@@ -489,14 +489,11 @@ function ProjectTrackerContent() {
 
       {/* Script Ready Callout Banner */}
       {isScriptReady && (
-        <div className="relative overflow-hidden rounded-3xl border border-lime-300 dark:border-[#BFF97E]/40 bg-gradient-to-r from-lime-50 via-white to-emerald-50 dark:from-[#121612] dark:via-[#161c16] dark:to-[#0c0f0c] p-7 shadow-sm dark:shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+        <div className="relative overflow-hidden rounded-3xl border border-brand-lime/40 bg-gradient-to-r from-brand-glow via-paper-2 to-paper-3 dark:from-paper-2 dark:via-paper-3 dark:to-paper p-7 shadow-sm dark:shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
             <div className="space-y-1.5">
-              <div className="inline-flex items-center space-x-2 text-xs font-bold text-lime-700 dark:text-[#BFF97E] uppercase tracking-wider">
-                <Sparkles className="h-4 w-4 text-lime-600 dark:text-[#BFF97E]" />
-                <span>Script Generated & Ready for Review</span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
+              <p className="sr-only">Script generated and ready for review</p>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-overlay-ink">
                 Review Scenes & Start Video Generation
               </h2>
               <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
@@ -507,11 +504,11 @@ function ProjectTrackerContent() {
             <button
               onClick={handleStartScenes}
               disabled={isStartingScenes}
-              className="pill-btn-lime px-8 py-4 text-sm font-bold text-black flex items-center space-x-2 shadow-xl hover:opacity-95 shrink-0"
+              className="pill-btn-lime px-8 py-4 text-sm font-bold text-brand-ink flex items-center space-x-2 shadow-xl hover:opacity-95 shrink-0"
             >
               {isStartingScenes ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin text-black" />
+                  <Loader2 className="h-4 w-4 animate-spin text-brand-ink" />
                   <span>Starting Google Flow...</span>
                 </>
               ) : (
@@ -526,48 +523,48 @@ function ProjectTrackerContent() {
       )}
 
       {/* Progress & Milestones Tracker */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/85 p-6 space-y-6 shadow-sm dark:shadow-xl backdrop-blur-2xl">
+      <div className="relative overflow-hidden rounded-3xl border border-rule bg-paper-2/95 dark:bg-paper-2/85 p-6 space-y-6 shadow-sm dark:shadow-xl backdrop-blur-2xl">
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs font-medium">
             <span className="text-slate-800 dark:text-slate-200 font-semibold flex items-center space-x-2.5">
               <span className="relative flex h-2.5 w-2.5">
                 {isGenerating && (
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-500 dark:bg-[#BFF97E] opacity-75"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-lime opacity-75"></span>
                 )}
                 <span
                   className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
-                    isGenerating
-                      ? 'bg-lime-500 dark:bg-[#BFF97E]'
-                      : isPaused
-                      ? 'bg-amber-400'
-                      : isAssembledOrDone
-                      ? 'bg-emerald-400'
-                      : 'bg-slate-300 dark:bg-white/20'
-                  }`}
-                />
-              </span>
-              <span>{project.currentStageMessage || 'Initializing production engine...'}</span>
-            </span>
+ isGenerating
+ ? 'bg-brand-lime'
+ : isPaused
+ ? 'bg-amber-400'
+ : isAssembledOrDone
+ ? 'bg-emerald-400'
+ : 'bg-slate-300 dark:bg-paper-2/20'
+ }`}
+ />
+ </span>
+ <span>{project.currentStageMessage || 'Initializing production engine...'}</span>
+ </span>
 
-            <div className="flex items-center space-x-3">
-              <span className="font-mono text-sm font-bold text-lime-700 dark:text-[#BFF97E]">
-                {project.progressPercent}%
-              </span>
-            </div>
-          </div>
+ <div className="flex items-center space-x-3">
+ <span className="font-mono text-sm font-bold text-brand-lime">
+ {project.progressPercent}%
+ </span>
+ </div>
+ </div>
 
-          {/* Lime/Mint Gradient Progress Bar */}
-          <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/5">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ease-out ${
+ {/* Lime/Mint Gradient Progress Bar */}
+ <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-overlay/40 border border-slate-200 dark:border-rule">
+ <div
+ className={`h-full rounded-full transition-colors duration-500 ease-out ${
                 isPaused
                   ? 'bg-amber-500'
-                  : 'bg-gradient-to-r from-lime-400 via-emerald-400 to-teal-400 dark:from-[#BFF97E] dark:via-[#98F899] dark:to-[#CCFFEA]'
+                  : 'bg-gradient-to-r from-brand-lime via-brand-mint dark:to-brand-glow'
               }`}
               style={{ width: `${project.progressPercent}%` }}
             >
               {isGenerating && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-overlay-ink/40 to-transparent animate-shimmer" />
               )}
             </div>
           </div>
@@ -580,25 +577,25 @@ function ProjectTrackerContent() {
             return (
               <div
                 key={st.key}
-                className={`flex items-center space-x-3 rounded-2xl border p-3.5 transition-all ${
-                  st.done
-                    ? 'border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
-                    : st.active
-                    ? 'border-lime-500 dark:border-[#BFF97E]/60 bg-lime-50/80 dark:bg-[#BFF97E]/10 text-slate-900 dark:text-white shadow-md dark:shadow-lg dark:shadow-[#BFF97E]/10'
-                    : 'border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20 text-slate-500'
-                }`}
-              >
-                <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
+                className={`flex items-center space-x-3 rounded-2xl border p-3.5 transition-colors ${
+ st.done
+ ? 'border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
+ : st.active
+ ? 'border-brand-lime/60 bg-brand-lime/10 text-slate-900 dark:text-overlay-ink shadow-md dark:shadow-lg shadow-brand-lime/10'
+ : 'border-slate-200 dark:border-rule bg-slate-50 dark:bg-overlay/20 text-slate-500'
+ }`}
+ >
+ <div
+ className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
                     st.done
                       ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold'
                       : st.active
-                      ? 'bg-lime-400 dark:bg-[#BFF97E] text-black font-bold shadow-md'
-                      : 'bg-slate-200 dark:bg-white/5 text-slate-500'
+                      ? 'bg-brand-lime text-brand-ink font-bold shadow-md'
+                      : 'bg-slate-200 dark:bg-paper-2/5 text-slate-500'
                   }`}
                 >
                   {st.active ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-black" />
+                    <Loader2 className="h-4 w-4 animate-spin text-brand-ink" />
                   ) : st.done ? (
                     <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400 stroke-[3]" />
                   ) : (
@@ -607,7 +604,7 @@ function ProjectTrackerContent() {
                 </div>
                 <div className="min-w-0">
                   <span className="text-xs font-bold block truncate">{st.label}</span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block truncate">
                     {st.done ? 'Completed' : st.active ? 'In Progress...' : 'Pending'}
                   </span>
                 </div>
@@ -618,11 +615,11 @@ function ProjectTrackerContent() {
       </div>
 
       {/* Main Video Cinema Player Frame */}
-      <div className="order-3 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-6 sm:p-8 space-y-6 shadow-sm dark:shadow-2xl backdrop-blur-2xl">
+      <div className="order-3 rounded-3xl border border-rule bg-paper-2/95 dark:bg-paper-2/90 p-6 sm:p-8 space-y-6 shadow-sm dark:shadow-2xl backdrop-blur-2xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-              <Film className="h-4 w-4 text-lime-600 dark:text-[#BFF97E]" />
+            <h3 className="text-lg font-bold text-slate-900 dark:text-overlay-ink flex items-center space-x-2">
+              <Film className="h-4 w-4 text-brand-lime" />
               <span>{isAssembledOrDone ? 'Final Video Cinema' : 'Video Output Canvas'}</span>
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
@@ -633,24 +630,24 @@ function ProjectTrackerContent() {
           </div>
 
           {/* Aspect Ratio Switcher Segmented Pills */}
-          <div className="flex rounded-full bg-slate-100 dark:bg-black/40 p-1 border border-slate-200 dark:border-white/10 shrink-0">
+          <div className="flex rounded-full bg-slate-100 dark:bg-overlay/40 p-1 border border-slate-200 dark:border-rule shrink-0">
             <button
               onClick={() => setActivePlayerTab('9:16')}
-              className={`rounded-full px-4 py-1.5 text-xs font-bold flex items-center space-x-1.5 transition-all ${
-                activePlayerTab === '9:16'
-                  ? 'pill-btn-lime shadow-md'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <Smartphone className="h-3.5 w-3.5" />
-              <span>9:16 Vertical</span>
-            </button>
-            <button
-              onClick={() => setActivePlayerTab('16:9')}
-              className={`rounded-full px-4 py-1.5 text-xs font-bold flex items-center space-x-1.5 transition-all ${
+              className={`rounded-full px-4 py-1.5 text-xs font-bold flex items-center space-x-1.5 transition-colors ${
+ activePlayerTab === '9:16'
+ ? 'pill-btn-lime shadow-md'
+ : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-overlay-ink'
+ }`}
+ >
+ <Smartphone className="h-3.5 w-3.5" />
+ <span>9:16 Vertical</span>
+ </button>
+ <button
+ onClick={() => setActivePlayerTab('16:9')}
+ className={`rounded-full px-4 py-1.5 text-xs font-bold flex items-center space-x-1.5 transition-colors ${
                 activePlayerTab === '16:9'
                   ? 'pill-btn-lime shadow-md'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-overlay-ink'
               }`}
             >
               <Tv className="h-3.5 w-3.5" />
@@ -660,28 +657,26 @@ function ProjectTrackerContent() {
         </div>
 
         {/* Video Viewer Container */}
-        <div className="flex justify-center bg-slate-950 dark:bg-black/60 rounded-3xl p-6 sm:p-8 border border-slate-800 dark:border-white/5 min-h-[480px] items-center">
+        <div className="flex justify-center bg-slate-950 dark:bg-overlay/60 rounded-3xl p-6 sm:p-8 border border-slate-800 dark:border-rule min-h-[480px] items-center">
           {isAssembledOrDone && hasOutputVideos ? (
             activePlayerTab === '9:16' && project.outputVideo916 ? (
-              <div className="relative mx-auto w-[290px] h-[515px] rounded-[36px] overflow-hidden shadow-2xl border-4 border-white/15 bg-black">
+              <div className="relative mx-auto w-[290px] h-[515px] rounded-[36px] overflow-hidden shadow-2xl border-4 border-rule bg-overlay">
                 <video
                   key={project.outputVideo916}
                   src={getVideoUrl(project.outputVideo916)}
                   controls
                   playsInline
-                  autoPlay={false}
                   preload="metadata"
                   className="w-full h-full object-cover"
                 />
               </div>
             ) : project.outputVideo169 ? (
-              <div className="relative w-full max-w-3xl aspect-video rounded-2xl overflow-hidden shadow-2xl border-2 border-white/15 bg-black">
+              <div className="relative w-full max-w-3xl aspect-video rounded-2xl overflow-hidden shadow-2xl border-2 border-rule bg-overlay">
                 <video
                   key={project.outputVideo169}
                   src={getVideoUrl(project.outputVideo169)}
                   controls
                   playsInline
-                  autoPlay={false}
                   preload="metadata"
                   className="w-full h-full object-contain"
                 />
@@ -695,12 +690,12 @@ function ProjectTrackerContent() {
             /* Generating / Skeleton State */
             <div className="w-full flex justify-center">
               {activePlayerTab === '9:16' ? (
-                <div className="relative w-[290px] h-[515px] rounded-[36px] overflow-hidden shadow-2xl border-4 border-white/15 bg-gradient-to-b from-[#121612] via-[#0c0f0c] to-[#121612] flex flex-col justify-between p-6 select-none">
-                  <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#BFF97E] to-transparent opacity-80 animate-scanline pointer-events-none" />
+                <div className="relative w-[290px] h-[515px] rounded-[36px] overflow-hidden shadow-2xl border-4 border-rule bg-gradient-to-b from-overlay via-paper to-overlay flex flex-col justify-between p-6 select-none">
+                  <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-brand-lime to-transparent opacity-80 animate-scanline pointer-events-none" />
 
                   <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex items-center space-x-2 rounded-full border border-[#BFF97E]/30 bg-[#BFF97E]/10 px-3 py-1 text-xs text-[#BFF97E] font-bold">
-                      <Sparkles className="h-3.5 w-3.5 text-[#BFF97E]" />
+                    <div className="flex items-center space-x-2 rounded-full border border-brand-lime/30 bg-brand-lime/10 px-3 py-1 text-xs text-brand-lime font-bold">
+                      <Sparkles className="h-3.5 w-3.5 text-brand-lime" />
                       <span>Reels Live Canvas</span>
                     </div>
                     <span className="text-xs text-slate-400 font-mono">
@@ -709,7 +704,7 @@ function ProjectTrackerContent() {
                   </div>
 
                   <div className="relative z-10 text-center space-y-3">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#BFF97E]/10 border border-[#BFF97E]/30 text-[#BFF97E]">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-lime/10 border border-brand-lime/30 text-brand-lime">
                       {isGenerating ? (
                         <Loader2 className="h-7 w-7 animate-spin" />
                       ) : (
@@ -717,7 +712,7 @@ function ProjectTrackerContent() {
                       )}
                     </div>
                     <div>
-                      <h4 className="text-base font-bold text-white">
+                      <h4 className="text-base font-bold text-overlay-ink">
                         {isGenerating
                           ? `Creating Scenes (${completedScenes}/${totalScenes})...`
                           : isScriptReady
@@ -731,8 +726,8 @@ function ProjectTrackerContent() {
                   </div>
 
                   <div className="relative z-10 space-y-2 text-center">
-                    <div className="p-2.5 rounded-2xl bg-black/80 border border-white/10 backdrop-blur-md">
-                      <span className="text-xs font-bold text-[#BFF97E]">
+                    <div className="p-2.5 rounded-2xl bg-overlay/80 border border-rule backdrop-blur-md">
+                      <span className="text-xs font-bold text-brand-lime">
                         {allScenesComplete
                           ? 'All scenes downloaded — assembling...'
                           : `${completedScenes}/${totalScenes} scenes completed`}
@@ -741,10 +736,10 @@ function ProjectTrackerContent() {
                   </div>
                 </div>
               ) : (
-                <div className="relative w-full max-w-2xl aspect-video rounded-3xl overflow-hidden shadow-2xl border-2 border-white/15 bg-gradient-to-b from-[#121612] via-[#0c0f0c] to-[#121612] flex flex-col justify-between p-6 select-none">
+                <div className="relative w-full max-w-2xl aspect-video rounded-3xl overflow-hidden shadow-2xl border-2 border-rule bg-gradient-to-b from-overlay via-paper to-overlay flex flex-col justify-between p-6 select-none">
                   <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex items-center space-x-2 rounded-full border border-[#BFF97E]/30 bg-[#BFF97E]/10 px-3 py-1 text-xs text-[#BFF97E] font-bold">
-                      <Sparkles className="h-3.5 w-3.5 text-[#BFF97E]" />
+                    <div className="flex items-center space-x-2 rounded-full border border-brand-lime/30 bg-brand-lime/10 px-3 py-1 text-xs text-brand-lime font-bold">
+                      <Sparkles className="h-3.5 w-3.5 text-brand-lime" />
                       <span>16:9 Widescreen Feed</span>
                     </div>
                     <span className="text-xs text-slate-400 font-mono">
@@ -753,10 +748,10 @@ function ProjectTrackerContent() {
                   </div>
 
                   <div className="relative z-10 text-center space-y-3 max-w-md mx-auto">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#BFF97E]/10 border border-[#BFF97E]/30 text-[#BFF97E]">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-lime/10 border border-brand-lime/30 text-brand-lime">
                       <Film className="h-7 w-7" />
                     </div>
-                    <h4 className="text-base font-bold text-white">
+                    <h4 className="text-base font-bold text-overlay-ink">
                       {isGenerating
                         ? `Rendering Scenes (${completedScenes}/${totalScenes})...`
                         : 'Widescreen Assembly Pending'}
@@ -775,18 +770,18 @@ function ProjectTrackerContent() {
 
       {/* Horizontal Scene Timeline Strip Directly Matching Reference Design (Image 1 Bottom) */}
       {project.script && (
-        <div className="order-1 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-6 space-y-4 shadow-sm dark:shadow-xl backdrop-blur-2xl">
+        <div className="order-1 rounded-3xl border border-rule bg-paper-2/95 dark:bg-paper-2/90 p-6 space-y-4 shadow-sm dark:shadow-xl backdrop-blur-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+              <h3 className="text-base font-bold text-slate-900 dark:text-overlay-ink flex items-center space-x-2">
                 <span>Horizontal Scene Timeline Strip</span>
               </h3>
-              <span className="rounded-full bg-lime-100 dark:bg-white/10 px-3 py-0.5 text-xs font-bold text-lime-800 dark:text-[#BFF97E] border border-lime-300 dark:border-transparent">
+              <span className="rounded-full bg-lime-100 dark:bg-paper-2/10 px-3 py-0.5 text-xs font-bold text-brand-lime border border-lime-300 dark:border-transparent">
                 {completedScenes}/{totalScenes} Scenes Ready
               </span>
             </div>
             <div className="flex items-center space-x-2 text-xs text-slate-600 dark:text-slate-400">
-              <Volume2 className="h-3.5 w-3.5 text-lime-600 dark:text-[#BFF97E]" />
+              <Volume2 className="h-3.5 w-3.5 text-brand-lime" />
               <span>Voiceover + Ken Burns Synced</span>
             </div>
           </div>
@@ -803,52 +798,52 @@ function ProjectTrackerContent() {
                 <div
                   key={idx}
                   onClick={() => setActiveScenePreviewIdx(idx)}
-                  className={`group relative flex-shrink-0 w-72 rounded-2xl border p-4 cursor-pointer transition-all ${
-                    isSelected
-                      ? 'border-lime-500 dark:border-[#BFF97E] bg-lime-50/50 dark:bg-[#161c16] ring-1 ring-lime-400 dark:ring-[#BFF97E] shadow-md dark:shadow-xl dark:shadow-[#BFF97E]/10'
-                      : 'border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/30 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-100/70 dark:hover:bg-[#141814]'
-                  }`}
-                >
-                  {/* Thumbnail / Preview Squircle */}
-                  <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-950 dark:bg-black/50 border border-slate-200 dark:border-white/10 mb-3">
-                    {sceneVideo ? (
-                      <video
-                        src={getVideoUrl(sceneVideo)}
-                        className="w-full h-full object-cover"
-                        preload="metadata"
-                      />
-                    ) : isSceneGenerating ? (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-black/60 text-[#BFF97E] space-y-1">
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        <span className="text-[10px] font-mono">Generating...</span>
-                      </div>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-400">
-                        <Film className="h-6 w-6" />
-                      </div>
-                    )}
+                  className={`group relative flex-shrink-0 w-72 rounded-2xl border p-4 cursor-pointer transition-colors ${
+ isSelected
+ ? 'border-brand-lime bg-lime-50/50 dark:bg-paper-3 ring-1 ring-brand-lime shadow-md dark:shadow-xl shadow-brand-lime/10'
+ : 'border-slate-200 dark:border-rule bg-slate-50/70 dark:bg-overlay/30 hover:border-slate-300 dark:hover:border-rule hover:bg-slate-100/70 dark:hover:bg-paper-3'
+ }`}
+ >
+ {/* Thumbnail / Preview Squircle */}
+ <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-950 dark:bg-overlay/50 border border-slate-200 dark:border-rule mb-3">
+ {sceneVideo ? (
+ <video
+ src={getVideoUrl(sceneVideo)}
+ className="w-full h-full object-cover"
+ preload="metadata"
+ />
+ ) : isSceneGenerating ? (
+ <div className="w-full h-full flex flex-col items-center justify-center bg-overlay/60 text-brand-lime space-y-1">
+ <Loader2 className="h-5 w-5 animate-spin" />
+ <span className="text-[11px] font-mono">Generating...</span>
+ </div>
+ ) : (
+ <div className="w-full h-full flex items-center justify-center text-slate-400">
+ <Film className="h-6 w-6" />
+ </div>
+ )}
 
-                    <div className="absolute top-2 left-2 rounded-full bg-black/70 backdrop-blur px-2 py-0.5 text-[10px] font-bold text-white">
-                      Scene {idx + 1}
-                    </div>
+ <div className="absolute top-2 left-2 rounded-full bg-overlay/70 backdrop-blur px-2 py-0.5 text-[11px] font-bold text-overlay-ink">
+ Scene {idx + 1}
+ </div>
 
-                    <div className="absolute top-2 right-2 rounded-full bg-black/70 backdrop-blur px-2 py-0.5 text-[10px] font-mono text-[#BFF97E]">
-                      {scene.durationSeconds}s
-                    </div>
-                  </div>
+ <div className="absolute top-2 right-2 rounded-full bg-overlay/70 backdrop-blur px-2 py-0.5 text-[11px] font-mono text-brand-lime">
+ {scene.durationSeconds}s
+ </div>
+ </div>
 
-                  {/* Narration & Audio Waveform Badge */}
-                  <div className="space-y-2">
-                    <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-2 italic leading-relaxed">
-                      &ldquo;{scene.narrationOrSubtitle}&rdquo;
-                    </p>
+ {/* Narration & Audio Waveform Badge */}
+ <div className="space-y-2">
+ <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-2 italic leading-relaxed">
+ &ldquo;{scene.narrationOrSubtitle}&rdquo;
+ </p>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-white/10 text-[10px]">
-                      <div className="flex items-center space-x-1.5 text-lime-700 dark:text-[#BFF97E] font-mono font-semibold">
-                        <span>♫ ||||||</span>
-                        <span className="text-slate-500 dark:text-slate-400 font-sans">Audio Synced</span>
-                      </div>
-                      <span className={`font-bold ${isSceneComplete ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`}>
+ <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-rule text-[11px]">
+ <div className="flex items-center space-x-1.5 text-brand-lime font-mono font-semibold">
+ <span>♫ ||||||</span>
+ <span className="text-slate-500 dark:text-slate-400 font-sans">Audio Synced</span>
+ </div>
+ <span className={`font-bold ${isSceneComplete ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`}>
                         {isSceneComplete ? '✓ Ready' : 'In Queue'}
                       </span>
                     </div>
@@ -862,15 +857,15 @@ function ProjectTrackerContent() {
 
       {/* Selected Scene Detailed Prompt & Edit Inspector */}
       {project.script && scenes[activeScenePreviewIdx] && (
-        <div className="order-2 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/85 p-6 space-y-4 shadow-sm dark:shadow-xl">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
-            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+        <div className="order-2 rounded-3xl border border-rule bg-paper-2/95 dark:bg-paper-2/85 p-6 space-y-4 shadow-sm dark:shadow-xl">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-rule pb-3">
+            <h4 className="text-sm font-bold text-slate-900 dark:text-overlay-ink flex items-center space-x-2">
               <span>Scene {activeScenePreviewIdx + 1} Prompt Inspector</span>
             </h4>
             <button
               onClick={() => handleRetryScene(scenes[activeScenePreviewIdx].sceneIndex)}
               disabled={retryingSceneIdx === scenes[activeScenePreviewIdx].sceneIndex}
-              className="pill-btn-lime px-4 py-1 text-xs font-bold text-black flex items-center space-x-1 shadow-sm"
+              className="pill-btn-lime px-4 py-1 text-xs font-bold text-brand-ink flex items-center space-x-1 shadow-sm"
             >
               <RotateCcw className="h-3 w-3" />
               <span>Regenerate Scene {activeScenePreviewIdx + 1}</span>
@@ -879,19 +874,19 @@ function ProjectTrackerContent() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+              <span className="text-[11px] font-bold  text-slate-500 dark:text-slate-400 block mb-1">
                 Visual Prompt (Google Flow Veo 3.1)
               </span>
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 text-xs font-mono text-slate-800 dark:text-slate-200 leading-relaxed break-words whitespace-pre-wrap">
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-overlay/40 border border-slate-200 dark:border-rule text-xs font-mono text-slate-800 dark:text-slate-200 leading-relaxed break-words whitespace-pre-wrap">
                 {scenes[activeScenePreviewIdx].visualPrompt}
               </div>
             </div>
 
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+              <span className="text-[11px] font-bold  text-slate-500 dark:text-slate-400 block mb-1">
                 Voiceover Narration
               </span>
-              <div className="p-3.5 rounded-2xl bg-lime-50/70 dark:bg-black/40 border border-lime-200 dark:border-white/10 text-xs text-lime-900 dark:text-[#BFF97E] italic leading-relaxed break-words whitespace-pre-wrap">
+              <div className="p-3.5 rounded-2xl bg-lime-50/70 dark:bg-overlay/40 border border-lime-200 dark:border-rule text-xs text-lime-900 text-brand-lime italic leading-relaxed break-words whitespace-pre-wrap">
                 &ldquo;{scenes[activeScenePreviewIdx].narrationOrSubtitle}&rdquo;
               </div>
             </div>
@@ -901,11 +896,11 @@ function ProjectTrackerContent() {
 
       {/* Dedicated Social Publishing Section (Gated for completed videos) */}
       {isAssembledOrDone && (
-        <div className="order-4 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-[#121612]/90 p-8 space-y-6 shadow-sm dark:shadow-2xl backdrop-blur-2xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-5">
+        <div className="order-4 rounded-3xl border border-rule bg-paper-2/95 dark:bg-paper-2/90 p-8 space-y-6 shadow-sm dark:shadow-2xl backdrop-blur-2xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-rule pb-5">
             <div>
-              <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
-                <Share2 className="h-5 w-5 text-lime-600 dark:text-[#BFF97E]" />
+              <h3 className="text-xl font-extrabold text-slate-900 dark:text-overlay-ink flex items-center space-x-2">
+                <Share2 className="h-5 w-5 text-brand-lime" />
                 <span>Meta Suite Publishing Hub</span>
               </h3>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
@@ -915,7 +910,7 @@ function ProjectTrackerContent() {
 
             <button
               onClick={handleCopyCaption}
-              className="rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-all flex items-center space-x-1.5 shadow-sm"
+              className="rounded-full border border-slate-200 dark:border-rule bg-paper-2 dark:bg-paper-2/5 px-4 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-brand-ink dark:hover:text-overlay-ink transition-colors flex items-center space-x-1.5 shadow-sm"
             >
               {copiedCaption ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
               <span>{copiedCaption ? 'Copied!' : 'Copy Caption & Tags'}</span>
@@ -925,27 +920,27 @@ function ProjectTrackerContent() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300  block mb-1.5">
                   Post Caption
                 </label>
                 <textarea
                   value={editedCaption}
                   onChange={e => setEditedCaption(e.target.value)}
                   rows={4}
-                  className="w-full rounded-2xl border border-slate-300 dark:border-white/10 bg-slate-50/70 dark:bg-black/40 p-4 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-lime-500 dark:focus:border-[#BFF97E]/50 leading-relaxed font-sans"
+                  className="w-full rounded-2xl border border-slate-300 dark:border-rule bg-slate-50/70 dark:bg-overlay/40 p-4 text-xs text-slate-900 dark:text-overlay-ink focus:outline-none focus:border-brand-lime/70 leading-relaxed font-sans"
                   placeholder="Enter caption for Instagram & Facebook..."
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300  block mb-1.5">
                   Hashtags
                 </label>
                 <input
                   type="text"
                   value={editedHashtags}
                   onChange={e => setEditedHashtags(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-300 dark:border-white/10 bg-slate-50/70 dark:bg-black/40 px-4 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-lime-500 dark:focus:border-[#BFF97E]/50 font-mono"
+                  className="w-full rounded-2xl border border-slate-300 dark:border-rule bg-slate-50/70 dark:bg-overlay/40 px-4 py-2.5 text-xs text-slate-900 dark:text-overlay-ink focus:outline-none focus:border-brand-lime/70 font-mono"
                   placeholder="#ai #reels #viral #trending"
                 />
               </div>
@@ -953,66 +948,66 @@ function ProjectTrackerContent() {
 
             <div className="space-y-4 flex flex-col justify-between">
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-2">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300  block mb-2">
                   Destinations
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/30 cursor-pointer hover:border-slate-300 dark:hover:border-white/20 shadow-sm">
+                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-rule bg-slate-50/70 dark:bg-overlay/30 cursor-pointer hover:border-slate-300 dark:hover:border-rule shadow-sm">
                     <div className="flex items-center space-x-2">
                       <Instagram className="h-4 w-4 text-pink-600 dark:text-pink-400" />
-                      <span className="text-xs font-semibold text-slate-900 dark:text-white">Instagram Reels</span>
+                      <span className="text-xs font-semibold text-slate-900 dark:text-overlay-ink">Instagram Reels</span>
                     </div>
                     <input
                       type="checkbox"
                       checked={selectedTargets.instagramReels}
                       onChange={e => setSelectedTargets({ ...selectedTargets, instagramReels: e.target.checked })}
-                      className="accent-lime-500 dark:accent-[#BFF97E]"
+                      className="accent-brand-lime dark:accent-brand-lime"
                     />
                   </label>
 
-                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/30 cursor-pointer hover:border-slate-300 dark:hover:border-white/20 shadow-sm">
+                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-rule bg-slate-50/70 dark:bg-overlay/30 cursor-pointer hover:border-slate-300 dark:hover:border-rule shadow-sm">
                     <div className="flex items-center space-x-2">
                       <Facebook className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      <span className="text-xs font-semibold text-slate-900 dark:text-white">Facebook Reels</span>
+                      <span className="text-xs font-semibold text-slate-900 dark:text-overlay-ink">Facebook Reels</span>
                     </div>
                     <input
                       type="checkbox"
                       checked={selectedTargets.facebookReels}
                       onChange={e => setSelectedTargets({ ...selectedTargets, facebookReels: e.target.checked })}
-                      className="accent-lime-500 dark:accent-[#BFF97E]"
+                      className="accent-brand-lime dark:accent-brand-lime"
                     />
                   </label>
 
-                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/30 cursor-pointer hover:border-slate-300 dark:hover:border-white/20 shadow-sm">
+                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-rule bg-slate-50/70 dark:bg-overlay/30 cursor-pointer hover:border-slate-300 dark:hover:border-rule shadow-sm">
                     <div className="flex items-center space-x-2">
                       <Facebook className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                      <span className="text-xs font-semibold text-slate-900 dark:text-white">Page Video</span>
+                      <span className="text-xs font-semibold text-slate-900 dark:text-overlay-ink">Page Video</span>
                     </div>
                     <input
                       type="checkbox"
                       checked={selectedTargets.facebookPageVideo}
                       onChange={e => setSelectedTargets({ ...selectedTargets, facebookPageVideo: e.target.checked })}
-                      className="accent-lime-500 dark:accent-[#BFF97E]"
+                      className="accent-brand-lime dark:accent-brand-lime"
                     />
                   </label>
 
-                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-black/30 cursor-pointer hover:border-slate-300 dark:hover:border-white/20 shadow-sm">
+                  <label className="flex items-center justify-between p-3 rounded-2xl border border-slate-200 dark:border-rule bg-slate-50/70 dark:bg-overlay/30 cursor-pointer hover:border-slate-300 dark:hover:border-rule shadow-sm">
                     <div className="flex items-center space-x-2">
                       <Phone className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                      <span className="text-xs font-semibold text-slate-900 dark:text-white">WhatsApp</span>
+                      <span className="text-xs font-semibold text-slate-900 dark:text-overlay-ink">WhatsApp</span>
                     </div>
                     <input
                       type="checkbox"
                       checked={selectedTargets.whatsappStatus}
                       onChange={e => setSelectedTargets({ ...selectedTargets, whatsappStatus: e.target.checked })}
-                      className="accent-lime-500 dark:accent-[#BFF97E]"
+                      className="accent-brand-lime dark:accent-brand-lime"
                     />
                   </label>
                 </div>
               </div>
 
               {publishFeedback && (
-                <div className="p-3 rounded-2xl border text-xs bg-lime-50 dark:bg-[#BFF97E]/10 border-lime-300 dark:border-[#BFF97E]/30 text-lime-900 dark:text-white">
+                <div className="p-3 rounded-2xl border text-xs bg-lime-50 bg-brand-lime/10 border-brand-lime/30 text-lime-900 dark:text-overlay-ink">
                   {publishFeedback}
                 </div>
               )}
@@ -1020,11 +1015,11 @@ function ProjectTrackerContent() {
               <button
                 onClick={handleManualPublish}
                 disabled={isPublishing}
-                className="w-full pill-btn-lime py-4 text-sm font-bold text-black flex items-center justify-center space-x-2 shadow-xl hover:opacity-95"
+                className="w-full pill-btn-lime py-4 text-sm font-bold text-brand-ink flex items-center justify-center space-x-2 shadow-xl hover:opacity-95"
               >
                 {isPublishing ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin text-black" />
+                    <Loader2 className="h-4 w-4 animate-spin text-brand-ink" />
                     <span>Publishing to Meta Suite...</span>
                   </>
                 ) : (
@@ -1047,7 +1042,7 @@ export default function ProjectTrackerPage() {
     <Suspense
       fallback={
         <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-lime-500 dark:border-[#BFF97E] border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-lime border-t-transparent" />
         </div>
       }
     >
